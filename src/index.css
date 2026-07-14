@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-nature-green: #1b4332;
+    --color-nature-green-light: #2d6a4f;
+    --color-nature-sage: #e8efe9; 
+    --color-lavender: #9c8cb9;
+    --color-lavender-light: #b5a6c9;
+    --color-base-white: #ffffff;
+    --color-base-cream: #fcfbf7;
+  }
+  
+  html {
+    @apply font-sans text-nature-green;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply m-0 p-0 overflow-x-hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+  
+
+}
