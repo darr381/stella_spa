@@ -35,8 +35,16 @@ const CanvasSequence = ({ folderName, frameCount }) => {
       if (!startTime) startTime = timestamp;
       const elapsed = timestamp - startTime;
       
-      // Calculate current frame based on elapsed time and FPS (looping)
-      const currentFrame = Math.floor((elapsed / 1000) * fps) % frameCount;
+      // Calculate theoretical frame step based on elapsed time and FPS
+      const theoreticalFrame = Math.floor((elapsed / 1000) * fps);
+      
+      // Ping-Pong Loop Math (Triangle Wave)
+      const maxIndex = frameCount - 1;
+      const cycleLength = maxIndex * 2;
+      const step = theoreticalFrame % cycleLength;
+      
+      // If in the first half of the cycle, play forward. If in the second half, play backward.
+      const currentFrame = step <= maxIndex ? step : cycleLength - step;
       
       renderFrame(currentFrame);
       animationFrameId = requestAnimationFrame(animate);

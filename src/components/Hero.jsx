@@ -5,7 +5,7 @@ import CanvasSequence from './CanvasSequence';
 const Hero = () => {
   return (
     <section id="home" className="relative w-full h-[100dvh] flex flex-col items-center justify-center px-6 text-center z-10 overflow-hidden">
-      <CanvasSequence folderName="image_sequence_1" frameCount={79} />
+      <CanvasSequence folderName="image_sequence_1" frameCount={75} />
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
