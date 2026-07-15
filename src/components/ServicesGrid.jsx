@@ -5,32 +5,32 @@ const services = [
   {
     title: 'Hair Cut',
     description: 'Botanical cuts and conditioning treatments infused with herbal essences.',
-    image: 'https://images.unsplash.com/photo-1560869713-da86a9ec0744?q=80&w=800&auto=format&fit=crop',
+    image: '/services_images/hair_cut.png',
   },
   {
     title: 'Head Spa',
     description: 'Deeply relaxing Ayurvedic scalp massages featuring warm, essential oils.',
-    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=800&auto=format&fit=crop', 
+    image: '/services_images/head_spa.png', 
   },
   {
     title: 'Nail Spa',
     description: 'Nourishing manicures and pedicures utilizing organic lavender scrubs.',
-    image: 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop', 
+    image: '/services_images/nail_spa.png', 
   },
   {
     title: 'Foot Spa',
     description: 'Detoxifying forest-clay foot baths and reflexology sessions.',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop', 
+    image: '/services_images/foot_spa.png', 
   },
   {
-    title: 'Face Spa',
-    description: 'Holistic, vitamin-rich facials designed to bring out your natural glow.',
-    image: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=800&auto=format&fit=crop', 
+    title: 'Massage Spa',
+    description: 'Deep tissue and relaxation massages to release tension and restore balance.',
+    image: '/services_images/massage_spa.png', 
   },
   {
     title: 'Aromatherapy',
     description: 'Breathe in the pure essence of lavender fields and eucalyptus forests.',
-    image: 'https://images.unsplash.com/photo-1608248593842-83b3e2a22530?q=80&w=800&auto=format&fit=crop', 
+    image: '/services_images/aromatherapy.png', 
   }
 ];
 
