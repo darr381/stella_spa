@@ -1,10 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 
-const CanvasSequence = () => {
+const CanvasSequence = ({ folderName, frameCount }) => {
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const framesRef = useRef([]);
-  const frameCount = 120;
   const fps = 30; // Playback speed in frames per second
 
   useEffect(() => {
@@ -22,7 +21,7 @@ const CanvasSequence = () => {
         const cWidth = canvas.width;
         const cHeight = canvas.height;
         
-        // object-cover scaling
+        // object-cover scaling inside the buffer
         const scale = Math.max(cWidth / img.width, cHeight / img.height);
         const x = (cWidth / 2) - (img.width / 2) * scale;
         const y = (cHeight / 2) - (img.height / 2) * scale;
@@ -44,24 +43,26 @@ const CanvasSequence = () => {
     };
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      // renderFrame will be continuously called by the animate loop
-    };
-
-    const getFileName = (i) => {
-      const paddedIndex = i.toString().padStart(3, '0');
-      if (i <= 10) return `enhanced_${paddedIndex}.jpg`;
-      if (i <= 20) return `enhanced_${paddedIndex}_1080p.jpg`;
-      const v = Math.floor((i - 1) / 10);
-      return `enhanced_${paddedIndex}_1080p_v${v}.jpg`;
+      const dpr = window.devicePixelRatio || 1;
+      const parent = canvas.parentElement;
+      const pWidth = parent.clientWidth;
+      const pHeight = parent.clientHeight;
+      
+      // Set visual size to perfectly fill parent
+      canvas.style.width = pWidth + 'px';
+      canvas.style.height = pHeight + 'px';
+      
+      // Set actual internal buffer size to match display density
+      canvas.width = pWidth * dpr;
+      canvas.height = pHeight * dpr;
     };
 
     const loadImages = () => {
       let firstLoaded = false;
       for (let i = 1; i <= frameCount; i++) {
         const img = new Image();
-        img.src = `/image_sequence/${getFileName(i)}`;
+        const paddedIndex = i.toString().padStart(3, '0');
+        img.src = `/${folderName}/ezgif-frame-${paddedIndex}.jpg`;
         framesRef.current.push(img);
         
         img.onload = () => {
@@ -84,17 +85,18 @@ const CanvasSequence = () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
+      framesRef.current = [];
     };
-  }, []);
+  }, [folderName, frameCount]);
 
   return (
-    <div className="fixed top-0 left-0 w-full h-[100vh] -z-20 bg-nature-green">
+    <div className="absolute inset-0 w-full h-full -z-20 bg-nature-green overflow-hidden">
       <canvas
         ref={canvasRef}
-        className="w-full h-full object-cover opacity-80"
+        className="w-full h-full opacity-80"
       />
       {/* Subtle overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/40" />
     </div>
   );
 };

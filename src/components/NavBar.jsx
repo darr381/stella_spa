@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf } from 'lucide-react';
+import { Leaf, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,39 +14,108 @@ const NavBar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-      scrolled 
-        ? 'bg-base-cream/80 backdrop-blur-md shadow-sm py-4' 
-        : 'bg-transparent py-6'
-    }`}>
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Leaf className={`w-6 h-6 transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`} />
-          <span className={`font-serif text-2xl font-semibold tracking-wide transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
-            NaturaSpa
-          </span>
-        </div>
-        
-        <ul className={`hidden md:flex gap-8 font-sans text-sm font-medium transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
-          {['Home', 'Services', 'About', 'Testimonials'].map((link) => (
-            <li key={link}>
-              <a href={`#${link.toLowerCase()}`} className="hover:text-lavender transition-colors">
-                {link}
-              </a>
-            </li>
-          ))}
-        </ul>
+  // Prevent background scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; }
+  }, [mobileMenuOpen]);
 
-        <button className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
-          scrolled 
-            ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
-            : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
-        }`}>
-          Book Now
-        </button>
-      </div>
-    </nav>
+  const navLinks = ['Home', 'Services', 'About', 'Testimonials'];
+
+  return (
+    <>
+      <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+        scrolled || mobileMenuOpen
+          ? 'bg-base-cream/95 backdrop-blur-md shadow-sm py-4' 
+          : 'bg-transparent py-6'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Leaf className={`w-6 h-6 transition-colors ${scrolled || mobileMenuOpen ? 'text-nature-green' : 'text-white'}`} />
+            <span className={`font-serif text-2xl font-semibold tracking-wide transition-colors ${scrolled || mobileMenuOpen ? 'text-nature-green' : 'text-white'}`}>
+              NaturaSpa
+            </span>
+          </div>
+          
+          {/* Desktop Menu */}
+          <ul className={`hidden md:flex gap-8 font-sans text-sm font-medium transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
+            {navLinks.map((link) => (
+              <li key={link}>
+                <a href={`#${link.toLowerCase()}`} className="hover:text-lavender transition-colors">
+                  {link}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <button className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
+            scrolled 
+              ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
+              : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
+          }`}>
+            Book Now
+          </button>
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden p-2 z-50 transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Navigation"
+          >
+            {mobileMenuOpen ? (
+              <X className={`w-7 h-7 ${scrolled || mobileMenuOpen ? 'text-nature-green' : 'text-white'}`} />
+            ) : (
+              <Menu className={`w-7 h-7 ${scrolled ? 'text-nature-green' : 'text-white'}`} />
+            )}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 w-full h-[100dvh] bg-base-cream/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center pt-10 px-6"
+          >
+            <ul className="flex flex-col items-center gap-10 font-serif text-3xl text-nature-green">
+              {navLinks.map((link, idx) => (
+                <motion.li 
+                  key={link}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + idx * 0.05 }}
+                >
+                  <a 
+                    href={`#${link.toLowerCase()}`} 
+                    className="hover:text-lavender transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link}
+                  </a>
+                </motion.li>
+              ))}
+            </ul>
+            <motion.button 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="mt-14 bg-nature-green text-white hover:bg-nature-greenLight px-12 py-4 rounded-full font-sans text-lg font-medium shadow-lg transition-all active:scale-95"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Book Appointment
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
