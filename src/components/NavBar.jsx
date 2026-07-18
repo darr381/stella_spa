@@ -1,10 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { Leaf, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const NavBar = () => {
+const NavBar = ({ onOpenLogin }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBookClick = (e) => {
+    if (e) e.preventDefault();
+    if (user && user.phone) {
+      navigate('/book');
+    } else {
+      if (onOpenLogin) onOpenLogin();
+    }
+  };
+
+  const handleMobileBookClick = (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    if (user && user.phone) {
+      navigate('/book');
+    } else {
+      if (onOpenLogin) onOpenLogin();
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +75,7 @@ const NavBar = () => {
             ))}
           </ul>
 
-          <button className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
+          <button type="button" onClick={handleBookClick} className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
             scrolled 
               ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
               : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
@@ -103,15 +126,18 @@ const NavBar = () => {
                 </motion.li>
               ))}
             </ul>
-            <motion.button 
+            <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="mt-14 bg-nature-green text-white hover:bg-nature-greenLight px-12 py-4 rounded-full font-sans text-lg font-medium shadow-lg transition-all active:scale-95"
-              onClick={() => setMobileMenuOpen(false)}
             >
-              Book Appointment
-            </motion.button>
+              <button 
+                onClick={handleMobileBookClick}
+                className="mt-14 block bg-nature-green text-white hover:bg-nature-greenLight px-12 py-4 rounded-full font-sans text-lg font-medium shadow-lg transition-all active:scale-95"
+              >
+                Book Appointment
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

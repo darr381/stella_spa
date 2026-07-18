@@ -1,8 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-const BookingTeaser = () => {
+const BookingTeaser = ({ onOpenLogin }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBookClick = (e) => {
+    if (e) e.preventDefault();
+    if (user && user.phone) {
+      navigate('/book');
+    } else {
+      if (onOpenLogin) onOpenLogin();
+    }
+  };
+
   return (
     <section className="relative py-32 px-6 z-10">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-lavender opacity-20 rounded-full blur-3xl -z-10"></div>
@@ -21,7 +35,7 @@ const BookingTeaser = () => {
           <p className="text-white/90 font-sans text-lg mb-10 max-w-xl mx-auto drop-shadow-md">
             Secure your moment of tranquility. Our botanical sanctuary awaits to restore your natural harmony with the calming essence of lavender.
           </p>
-          <button className="bg-white text-nature-green hover:bg-lavender hover:text-white px-10 py-4 rounded-full font-sans font-medium text-lg transition-all duration-300 shadow-xl hover:shadow-[0_0_20px_rgba(156,140,185,0.5)] flex items-center justify-center mx-auto gap-3">
+          <button onClick={handleBookClick} className="bg-white text-nature-green hover:bg-lavender hover:text-white px-10 py-4 rounded-full font-sans font-medium text-lg transition-all duration-300 shadow-xl hover:shadow-[0_0_20px_rgba(156,140,185,0.5)] flex w-fit items-center justify-center mx-auto gap-3">
             <Calendar className="w-5 h-5" />
             Book Your Appointment
           </button>
