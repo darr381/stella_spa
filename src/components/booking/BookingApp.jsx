@@ -7,8 +7,11 @@ import Step2Therapist from './Step2Therapist';
 import Step3DateTime from './Step3DateTime';
 import Step4Checkout from './Step4Checkout';
 import ReceiptSidebar from './ReceiptSidebar';
+import { useAuth } from '../../context/AuthContext';
 
 const BookingApp = () => {
+  const { user: authUser } = useAuth();
+
   const [bookingState, setBookingState] = useState({
     step: 1,
     service: null, // e.g., 'hairCut'
@@ -17,7 +20,7 @@ const BookingApp = () => {
     therapist: 'any',
     date: null,
     time: null,
-    user: { name: '', email: '', phone: '' }
+    user: { name: authUser?.name || '', phone: authUser?.phone || '' }
   });
 
   const nextStep = () => setBookingState(prev => ({ ...prev, step: Math.min(prev.step + 1, 4) }));
@@ -37,7 +40,7 @@ const BookingApp = () => {
           <span className="font-serif text-2xl font-semibold text-nature-green tracking-wide">NaturaSpa</span>
         </header>
 
-        <main className="flex-1 px-6 md:px-16 lg:px-32 max-w-5xl mx-auto w-full pt-10 pb-32 md:pb-20">
+        <main className="flex-1 px-6 md:px-10 lg:px-20 max-w-[75vw] mx-auto w-full pt-10 pb-32 md:pb-20">
           <WizardProgress currentStep={bookingState.step} />
           
           <div className="mt-16 relative">

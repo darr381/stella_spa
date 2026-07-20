@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const NavBar = ({ onOpenLogin }) => {
+const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
@@ -65,7 +65,7 @@ const NavBar = ({ onOpenLogin }) => {
           </div>
           
           {/* Desktop Menu */}
-          <ul className={`hidden md:flex gap-8 font-sans text-sm font-medium transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
+          <ul className={`hidden md:flex items-center gap-8 font-sans text-sm font-medium transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
             {navLinks.map((link) => (
               <li key={link}>
                 <a href={`#${link.toLowerCase()}`} className="hover:text-lavender transition-colors">
@@ -73,15 +73,52 @@ const NavBar = ({ onOpenLogin }) => {
                 </a>
               </li>
             ))}
+            <li>
+              <button 
+                onClick={onOpenStaffLogin}
+                className="hover:text-lavender transition-colors flex items-center font-medium"
+              >
+                Employee Portal
+              </button>
+            </li>
           </ul>
 
-          <button type="button" onClick={handleBookClick} className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
-            scrolled 
-              ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
-              : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
-          }`}>
-            Book Now
-          </button>
+          {user && user.phone ? (
+            <div className="hidden md:flex items-center gap-4">
+              <span className={`font-sans text-sm font-medium ${scrolled ? 'text-nature-green' : 'text-white'}`}>
+                Hi, {user.name.split(' ')[0]}
+              </span>
+              <button 
+                type="button" 
+                onClick={() => { 
+                  localStorage.removeItem('naturaSpaUser'); 
+                  window.location.reload(); 
+                }} 
+                className={`px-4 py-2 rounded-full font-sans text-sm font-medium border transition-all duration-300 ${
+                  scrolled 
+                    ? 'border-nature-green text-nature-green hover:bg-nature-green/10' 
+                    : 'border-white text-white hover:bg-white/10'
+                }`}
+              >
+                Sign Out
+              </button>
+              <button type="button" onClick={handleBookClick} className={`px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
+                scrolled 
+                  ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
+                  : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
+              }`}>
+                Book Now
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={handleBookClick} className={`hidden md:block px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
+              scrolled 
+                ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
+                : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
+            }`}>
+              Book Now
+            </button>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button 

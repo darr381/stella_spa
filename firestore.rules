@@ -24,6 +24,18 @@ service cloud.firestore {
       // Prevent any tampering, modifying, or deleting of existing users
       allow update, delete: if false;
     }
+
+    // Employee Profiles
+    match /employees/{employeeId} {
+      allow get, list, create, update: if true;
+      allow delete: if false;
+    }
+
+    // Bookings
+    match /bookings/{bookingId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
     
     // Default deny for everything else
     match /{document=**} {

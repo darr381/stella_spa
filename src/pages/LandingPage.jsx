@@ -5,13 +5,18 @@ import ServicesGrid from '../components/ServicesGrid';
 import BookingTeaser from '../components/BookingTeaser';
 import CanvasSequence from '../components/CanvasSequence';
 import LoginModal from '../components/LoginModal';
+import StaffLoginModal from '../components/StaffLoginModal';
 
 function LandingPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isStaffLoginModalOpen, setIsStaffLoginModalOpen] = useState(false);
 
   return (
     <div className="relative w-full selection:bg-lavender selection:text-white">
-      <NavBar onOpenLogin={() => setIsLoginModalOpen(true)} />
+      <NavBar 
+        onOpenLogin={() => setIsLoginModalOpen(true)} 
+        onOpenStaffLogin={() => setIsStaffLoginModalOpen(true)}
+      />
       <main>
         <Hero onOpenLogin={() => setIsLoginModalOpen(true)} />
         <div className="relative z-20 bg-base-cream rounded-t-[3rem] shadow-2xl">
@@ -32,6 +37,11 @@ function LandingPage() {
       <LoginModal 
         isOpen={isLoginModalOpen} 
         onClose={() => setIsLoginModalOpen(false)} 
+      />
+      
+      <StaffLoginModal 
+        isOpen={isStaffLoginModalOpen} 
+        onClose={() => setIsStaffLoginModalOpen(false)} 
       />
     </div>
   );

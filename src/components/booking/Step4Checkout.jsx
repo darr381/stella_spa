@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { db } from '../../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const Step4Checkout = ({ state, updateState, onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,18 +13,33 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
     updateState({ user: { ...state.user, [e.target.name]: e.target.value } });
   };
 
-  const isComplete = state.user.name.length > 2 && state.user.email.includes('@') && state.user.phone.length > 5;
+  const isComplete = state.user.name.length > 2 && state.user.phone.length > 5;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isComplete) return;
     setIsSubmitting(true);
     
-    // Simulate an API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const bookingData = {
+        customerName: state.user.name,
+        customerPhone: state.user.phone,
+        service: state.service,
+        addOns: state.addOns || [],
+        therapistId: state.therapist,
+        date: state.date,
+        time: state.time,
+        createdAt: new Date().toISOString()
+      };
+      
+      await addDoc(collection(db, 'bookings'), bookingData);
       setIsSuccess(true);
-    }, 1500);
+    } catch (error) {
+      console.error("Booking error: ", error);
+      alert("There was an error securing your appointment. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -37,7 +54,7 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
         </div>
         <h2 className="font-serif text-5xl text-nature-green">Sanctuary Reserved</h2>
         <p className="text-nature-green/70 font-sans max-w-md mx-auto text-lg leading-relaxed">
-          Thank you, {state.user.name.split(' ')[0]}. We have sent a confirmation email to <span className="font-medium text-nature-green">{state.user.email}</span> with your appointment details.
+          Thank you, {state.user.name.split(' ')[0]}. We have sent a confirmation text message to <span className="font-medium text-nature-green">{state.user.phone}</span> with your appointment details.
         </p>
         <Link 
           to="/"
@@ -63,7 +80,7 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Full Name</label>
+          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Name</label>
           <input 
             type="text" 
             name="name"
@@ -75,18 +92,6 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
           />
         </div>
         
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Email Address</label>
-          <input 
-            type="email" 
-            name="email"
-            value={state.user.email}
-            onChange={handleInputChange}
-            placeholder="jane@example.com"
-            className="p-4 rounded-2xl border-2 border-white bg-white focus:outline-none focus:border-lavender/50 transition-colors shadow-sm text-nature-green font-medium font-sans text-lg"
-            required
-          />
-        </div>
         
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Phone Number</label>
