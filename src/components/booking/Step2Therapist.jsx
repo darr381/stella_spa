@@ -17,7 +17,14 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
           ...doc.data()
         }));
         
-        // Add "Any Available" option if needed, but for now just show actual staff
+        // Add "Any Available" option explicitly
+        employeesList.push({
+          id: 'any',
+          name: 'Any Available Therapist',
+          specialty: 'First Available',
+          profilePicture: null
+        });
+        
         setTherapists(employeesList);
       } catch (err) {
         console.error("Error fetching therapists:", err);
@@ -99,7 +106,7 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
         </button>
         <button 
           onClick={onNext}
-          disabled={!state.therapist || state.therapist === 'any'}
+          disabled={!state.therapist}
           className="px-10 py-4 rounded-full font-sans text-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-nature-green text-white hover:bg-nature-greenLight shadow-lg hover:shadow-xl active:scale-95"
         >
           Select Date & Time

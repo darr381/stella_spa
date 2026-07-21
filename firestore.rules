@@ -31,10 +31,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Bookings
-    match /bookings/{bookingId} {
+    // Bookings (Subcollection)
+    match /therapists/{therapistId}/bookings/{bookingId} {
       allow read, create: if true;
       allow update, delete: if false;
+    }
+    
+    // Allow collection group query across all bookings
+    match /{path=**}/bookings/{bookingId} {
+      allow read: if true;
     }
     
     // Default deny for everything else

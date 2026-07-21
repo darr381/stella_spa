@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { db } from '../../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { services, therapists } from '../../data/bookingData';
 
 const Step4Checkout = ({ state, updateState, onBack }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,18 +23,62 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
     setIsSubmitting(true);
     
     try {
+      const assignedId = state.assignedTherapist || state.therapist;
+      
+      const serviceCat = Object.values(services).find(c => c.id === state.service);
+      const selectedOption = serviceCat?.options.find(o => o.id === state.subOption);
+      let totalDuration = selectedOption?.duration || 60;
+      if (state.addOns && state.addOns.length > 0 && selectedOption?.addOns) {
+        state.addOns.forEach(addId => {
+          const addOn = selectedOption.addOns.find(a => a.id === addId);
+          if (addOn) totalDuration += addOn.duration;
+        });
+      }
+
+      // Check double booking
+      const q = query(collection(db, `therapists/${assignedId}/bookings`), where('date', '==', state.date));
+      const snapshot = await getDocs(q);
+      
+      const parseTime = (timeStr) => {
+        let [hourStr, modifier] = timeStr.split(' ');
+        let hour = parseInt(hourStr.split(':')[0], 10);
+        if (modifier === 'PM' && hour !== 12) hour += 12;
+        if (modifier === 'AM' && hour === 12) hour = 0;
+        return hour * 60;
+      };
+
+      const myStart = parseTime(state.time);
+      const myEnd = myStart + totalDuration;
+      let hasOverlap = false;
+
+      snapshot.forEach(doc => {
+        const b = doc.data();
+        const bStart = parseTime(b.time);
+        const bEnd = bStart + (b.duration || 60);
+        if (myStart < bEnd && myEnd > bStart) {
+          hasOverlap = true;
+        }
+      });
+
+      if (hasOverlap) {
+        alert("This time slot was just booked by someone else! Please choose another time.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const bookingData = {
         customerName: state.user.name,
         customerPhone: state.user.phone,
         service: state.service,
         addOns: state.addOns || [],
-        therapistId: state.therapist,
+        therapistId: assignedId,
         date: state.date,
         time: state.time,
+        duration: totalDuration,
         createdAt: new Date().toISOString()
       };
       
-      await addDoc(collection(db, 'bookings'), bookingData);
+      await addDoc(collection(db, `therapists/${assignedId}/bookings`), bookingData);
       setIsSuccess(true);
     } catch (error) {
       console.error("Booking error: ", error);
@@ -50,7 +95,11 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
     const serviceName = state.service ? state.service.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Treatment';
     const dateStr = state.date ? new Date(state.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
     
-    const messageText = `Hi! This is a reminder for my upcoming booking at NaturaSpa.\n\nService: ${serviceName}\nDate: ${dateStr}\nTime: ${state.time}\n\nSee you there!`;
+    const assignedId = state.assignedTherapist || state.therapist;
+    const assignedTherapistObj = therapists.find(t => t.id === assignedId);
+    const assignedName = assignedTherapistObj ? assignedTherapistObj.name : 'Staff';
+
+    const messageText = `Hi! This is a reminder for my upcoming booking at NaturaSpa.\n\nService: ${serviceName}\nTherapist: ${assignedName}\nDate: ${dateStr}\nTime: ${state.time}\n\nSee you there!`;
     const encodedText = encodeURIComponent(messageText);
 
     const handleCopy = () => {
@@ -131,6 +180,10 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
                <div className="flex flex-col">
                  <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Service</span>
                  <span className="text-xl font-medium text-nature-green">{serviceName}</span>
+               </div>
+               <div className="flex flex-col">
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Therapist</span>
+                 <span className="text-xl font-medium text-nature-green">{assignedName}</span>
                </div>
                <div className="flex flex-col">
                  <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Date</span>
