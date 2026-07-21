@@ -73,7 +73,10 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         
         const querySnapshot = await getDocs(q);
         const fetched = [];
-        querySnapshot.forEach(doc => fetched.push(doc.data()));
+        querySnapshot.forEach(doc => {
+          if (state.editBookingId && doc.id === state.editBookingId) return;
+          fetched.push(doc.data());
+        });
         setBookings(fetched);
       } catch (err) {
         console.error("Error fetching bookings:", err);

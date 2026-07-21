@@ -3,13 +3,15 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Copy, Check, ChevronRight, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
-import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
 import { services, therapists } from '../../data/bookingData';
+import AlertModal from '../AlertModal';
 
 const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '' });
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -53,6 +55,8 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
       let hasOverlap = false;
 
       snapshot.forEach(doc => {
+        if (state.editBookingId && doc.id === state.editBookingId) return; // Ignore itself when editing
+        
         const b = doc.data();
         const bStart = parseTime(b.time);
         const bEnd = bStart + (b.duration || 60);
@@ -62,7 +66,11 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
       });
 
       if (hasOverlap) {
-        alert("This time slot was just booked by someone else! Please choose another time.");
+        setModalConfig({
+          isOpen: true,
+          title: 'Time Slot Taken',
+          message: 'This time slot was just booked by someone else! Please choose another time.'
+        });
         setIsSubmitting(false);
         return;
       }
@@ -84,11 +92,21 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
         createdAt: new Date().toISOString()
       };
       
-      await addDoc(collection(db, `therapists/${assignedId}/bookings`), bookingData);
+      if (state.editBookingId) {
+        // If modifying an existing booking, update it to keep the same ID
+        await updateDoc(doc(db, `therapists/${assignedId}/bookings`, state.editBookingId), bookingData);
+      } else {
+        // If it's a new booking, create it
+        await addDoc(collection(db, `therapists/${assignedId}/bookings`), bookingData);
+      }
       setIsSuccess(true);
     } catch (error) {
       console.error("Booking error: ", error);
-      alert("There was an error securing your appointment. Please try again.");
+      setModalConfig({
+        isOpen: true,
+        title: 'Booking Error',
+        message: 'There was an error securing your appointment. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -300,6 +318,13 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
           </button>
         </div>
       </form>
+
+      <AlertModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+      />
     </motion.div>
   );
 };

@@ -34,8 +34,7 @@ service cloud.firestore {
     // Bookings (Subcollection)
     match /therapists/{therapistId}/bookings/{bookingId} {
       allow read, create: if true;
-      allow update: if false;
-      allow delete: if resource.data.expireAt < request.time;
+      allow update, delete: if true;
     }
     
     // Allow collection group query across all bookings

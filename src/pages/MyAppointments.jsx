@@ -1,15 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collectionGroup, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collectionGroup, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
+import AlertModal from '../components/AlertModal';
 
 const MyAppointments = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
+
+  const handleDelete = (booking) => {
+    setModalConfig({
+      isOpen: true,
+      type: 'confirm',
+      title: 'Cancel Appointment',
+      message: `Are you sure you want to cancel your appointment on ${new Date(booking.date).toLocaleDateString()} at ${booking.time}?`,
+      onConfirm: () => {
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
+        executeDelete(booking);
+      }
+    });
+  };
+
+  const executeDelete = async (booking) => {
+    setDeletingId(booking.id);
+    try {
+      await deleteDoc(doc(db, `therapists/${booking.therapistId}/bookings`, booking.id));
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
+    } catch (err) {
+      console.error("Error deleting appointment:", err);
+      setModalConfig({
+        isOpen: true,
+        type: 'alert',
+        title: 'Error',
+        message: 'Failed to cancel the appointment. Please try again.',
+        onConfirm: null
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     // If not logged in, send them back to the landing page
@@ -140,21 +175,54 @@ const MyAppointments = () => {
                     </div>
                   </div>
                   
-                  <div className="text-right flex flex-col md:items-end gap-2 mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-nature-green/10">
+                  <div className="text-right flex flex-col md:items-end gap-3 mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-nature-green/10">
                     <span className="inline-block px-4 py-2 bg-white rounded-xl text-sm font-medium border border-nature-green/10 shadow-sm">
                       {booking.duration} Minutes
                     </span>
-                    <span className="text-xs opacity-60 flex items-center gap-1">
-                      Assigned to Therapist
-                    </span>
+                    
+                    <div className="flex items-center gap-2 mt-2">
+                      <button 
+                        onClick={() => navigate('/book', { state: { editBooking: booking } })}
+                        className="p-2 text-lavender hover:bg-lavender/10 rounded-full transition-colors relative group"
+                        title="Modify to change date or time of booking"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                        {/* Custom Tooltip */}
+                        <div className="absolute bottom-full right-0 mb-2 w-max px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          Modify to change date or time
+                          <div className="absolute top-full right-3 border-[5px] border-transparent border-t-gray-900"></div>
+                        </div>
+                      </button>
+                      
+                      <button 
+                        onClick={() => handleDelete(booking)}
+                        disabled={deletingId === booking.id}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                        title="Cancel Appointment"
+                      >
+                        {deletingId === booking.id ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-
       </main>
+
+      <AlertModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+      />
     </div>
   );
 };

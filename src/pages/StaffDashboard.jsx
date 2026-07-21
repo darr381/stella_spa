@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import AlertModal from '../components/AlertModal';
 import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,6 +21,7 @@ const StaffDashboard = () => {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [tempLeave, setTempLeave] = useState({ startDate: '', endDate: '' });
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '' });
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -430,7 +432,11 @@ const StaffDashboard = () => {
                     setOnLeave({ isOut: true, startDate: tempLeave.startDate, endDate: tempLeave.endDate });
                     setShowLeaveModal(false);
                   } else {
-                    alert('Please select both start and end dates.');
+                    setModalConfig({
+                      isOpen: true,
+                      title: 'Missing Dates',
+                      message: 'Please select both start and end dates.'
+                    });
                   }
                 }}
                 className="mt-4 w-full bg-nature-green text-white py-4 rounded-xl font-medium hover:bg-nature-greenLight transition-all active:scale-95"
@@ -459,6 +465,12 @@ const StaffDashboard = () => {
         )}
       </AnimatePresence>
 
+      <AlertModal 
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
+        title={modalConfig.title}
+        message={modalConfig.message}
+      />
     </div>
   );
 };
