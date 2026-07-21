@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -68,8 +68,23 @@ const StaffDashboard = () => {
           endDate: empData.onLeave?.endDate || ''
         });
 
-        // Fetch bookings
-        const q = query(collection(db, 'bookings'), where('therapistId', '==', empData.id));
+        // 1. Silent Cleanup: Delete old bookings for this specific employee
+        try {
+          const expiredQ = query(
+            collection(db, `therapists/${empData.id}/bookings`),
+            where('expireAt', '<', new Date())
+          );
+          const expiredSnap = await getDocs(expiredQ);
+          const deletePromises = expiredSnap.docs.map(docSnap => 
+            deleteDoc(doc(db, `therapists/${empData.id}/bookings`, docSnap.id))
+          );
+          await Promise.all(deletePromises);
+        } catch (cleanupErr) {
+          console.error("Cleanup failed:", cleanupErr);
+        }
+
+        // 2. Fetch remaining (future) bookings
+        const q = query(collection(db, `therapists/${empData.id}/bookings`));
         const bookingSnap = await getDocs(q);
         const fetchedBookings = bookingSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         
