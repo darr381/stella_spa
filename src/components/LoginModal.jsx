@@ -60,7 +60,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       setMode('not-found');
     } else if (result.success) {
       handleClose();
-      navigate('/book');
+      navigate('/my-appointments');
     } else {
       setError(result.error || 'Failed to login. Please try again.');
     }
@@ -74,7 +74,7 @@ const LoginModal = ({ isOpen, onClose }) => {
 
     if (result.success) {
       handleClose();
-      navigate('/book');
+      navigate('/my-appointments');
     } else {
       setError(result.error || 'Failed to create account. Please try again.');
     }

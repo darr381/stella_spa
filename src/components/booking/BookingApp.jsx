@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import WizardProgress from './WizardProgress';
 import Step1ServiceSelection from './Step1ServiceSelection';
@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const BookingApp = () => {
   const { user: authUser } = useAuth();
+  const navigate = useNavigate();
 
   const [bookingState, setBookingState] = useState({
     step: 1,
@@ -33,10 +34,10 @@ const BookingApp = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-[100dvh] overflow-y-auto relative">
         <header className="p-6 md:p-10 flex justify-between items-center z-10 sticky top-0 bg-base-cream/90 backdrop-blur-md border-b border-nature-green/5">
-          <Link to="/" className="text-nature-green hover:text-lavender transition-colors flex items-center gap-2 font-sans font-medium bg-white px-4 py-2 rounded-full shadow-sm">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Sanctuary
-          </Link>
+          <button onClick={() => navigate('/my-appointments')} className="flex items-center gap-2 text-nature-green hover:text-lavender transition-colors font-medium group bg-white px-4 py-2 rounded-full shadow-sm">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to My Appointments
+          </button>
           <span className="font-serif text-2xl font-semibold text-nature-green tracking-wide">NaturaSpa</span>
         </header>
 

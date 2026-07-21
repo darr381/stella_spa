@@ -4,7 +4,7 @@ import { services } from '../../data/bookingData';
 import { Check } from 'lucide-react';
 
 const Step1ServiceSelection = ({ state, updateState, onNext }) => {
-  
+
   const handleServiceSelect = (serviceId) => {
     if (state.service !== serviceId) {
       updateState({ service: serviceId, subOption: null, addOns: [] });
@@ -29,24 +29,23 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
   const currentOptionDef = currentServiceDef?.options.find(o => o.id === state.subOption);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       className="flex flex-col gap-10"
     >
       <div>
-        <h2 className="font-serif text-3xl text-nature-green mb-6">Select a Treatment</h2>
+        <h2 className="font-serif text-3xl text-nature-green mb-6">Select Your SPA</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {Object.values(services).map(svc => (
             <button
               key={svc.id}
               onClick={() => handleServiceSelect(svc.id)}
-              className={`p-6 rounded-2xl border-2 transition-all duration-300 text-left relative overflow-hidden ${
-                state.service === svc.id 
-                  ? 'border-nature-green bg-nature-green/5 shadow-md' 
+              className={`p-6 rounded-2xl border-2 transition-all duration-300 text-left relative overflow-hidden ${state.service === svc.id
+                  ? 'border-nature-green bg-nature-green/5 shadow-md'
                   : 'border-white bg-white hover:border-lavender/50 hover:bg-lavender/5 shadow-sm'
-              }`}
+                }`}
             >
               <span className={`block font-sans font-medium text-lg ${state.service === svc.id ? 'text-nature-green' : 'text-nature-green/70'}`}>
                 {svc.name}
@@ -74,11 +73,10 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
                 <button
                   key={opt.id}
                   onClick={() => handleSubOptionSelect(opt.id)}
-                  className={`p-6 rounded-2xl border-2 transition-all duration-300 flex justify-between items-center ${
-                    state.subOption === opt.id 
-                      ? 'border-nature-green bg-nature-green/5' 
+                  className={`p-6 rounded-2xl border-2 transition-all duration-300 flex justify-between items-center ${state.subOption === opt.id
+                      ? 'border-nature-green bg-nature-green/5'
                       : 'border-white bg-white hover:border-lavender/30 shadow-sm'
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col items-start">
                     <span className="font-sans font-medium text-nature-green text-lg">{opt.name}</span>
@@ -86,9 +84,8 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
                   </div>
                   <div className="flex items-center gap-6">
                     <span className="font-serif text-2xl text-nature-green">${opt.price}</span>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      state.subOption === opt.id ? 'border-nature-green bg-nature-green text-white' : 'border-nature-green/20'
-                    }`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${state.subOption === opt.id ? 'border-nature-green bg-nature-green text-white' : 'border-nature-green/20'
+                      }`}>
                       {state.subOption === opt.id && <Check className="w-4 h-4" />}
                     </div>
                   </div>
@@ -115,14 +112,12 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
                   <button
                     key={addon.id}
                     onClick={() => toggleAddOn(addon.id)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 flex justify-between items-center ${
-                      isSelected ? 'border-lavender bg-lavender/10 shadow-sm' : 'border-white bg-white hover:border-lavender/30 shadow-sm'
-                    }`}
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 flex justify-between items-center ${isSelected ? 'border-lavender bg-lavender/10 shadow-sm' : 'border-white bg-white hover:border-lavender/30 shadow-sm'
+                      }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'border-lavender bg-lavender text-white' : 'border-nature-green/30'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-[4px] border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-lavender bg-lavender text-white' : 'border-nature-green/30'
+                        }`}>
                         {isSelected && <Check className="w-3 h-3" />}
                       </div>
                       <span className="font-sans font-medium text-nature-green">{addon.name}</span>
@@ -137,14 +132,13 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
       </AnimatePresence>
 
       <div className="flex justify-end pt-8">
-        <button 
+        <button
           disabled={!isComplete}
           onClick={onNext}
-          className={`px-10 py-4 rounded-full font-sans text-lg font-medium transition-all ${
-            isComplete 
-              ? 'bg-nature-green text-white hover:bg-nature-greenLight shadow-lg hover:shadow-xl active:scale-95' 
+          className={`px-10 py-4 rounded-full font-sans text-lg font-medium transition-all ${isComplete
+              ? 'bg-nature-green text-white hover:bg-nature-greenLight shadow-lg hover:shadow-xl active:scale-95'
               : 'bg-nature-green/20 text-white cursor-not-allowed'
-          }`}
+            }`}
         >
           Continue to Therapist
         </button>

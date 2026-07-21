@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, Copy, Check } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, Copy, Check, ChevronRight, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { services, therapists } from '../../data/bookingData';
 
-const Step4Checkout = ({ state, updateState, onBack }) => {
+const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     updateState({ user: { ...state.user, [e.target.name]: e.target.value } });
@@ -228,12 +229,12 @@ const Step4Checkout = ({ state, updateState, onBack }) => {
 
         </div>
 
-        <Link 
-          to="/"
-          className="mt-8 px-12 py-4 rounded-full font-sans text-lg font-medium transition-all bg-nature-green text-white hover:bg-nature-greenLight shadow-lg active:scale-95"
+        <button 
+          onClick={() => navigate('/my-appointments')}
+          className="mt-8 bg-nature-green text-white hover:bg-nature-greenLight px-10 py-4 rounded-full font-sans text-lg font-medium shadow-xl transition-all active:scale-95"
         >
-          Return to Sanctuary
-        </Link>
+          Return to My Appointments
+        </button>
       </motion.div>
     );
   }

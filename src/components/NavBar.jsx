@@ -13,7 +13,7 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
   const handleBookClick = (e) => {
     if (e) e.preventDefault();
     if (user && user.phone) {
-      navigate('/book');
+      navigate('/my-appointments');
     } else {
       if (onOpenLogin) onOpenLogin();
     }
@@ -23,7 +23,7 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
     if (e) e.preventDefault();
     setMobileMenuOpen(false);
     if (user && user.phone) {
-      navigate('/book');
+      navigate('/my-appointments');
     } else {
       if (onOpenLogin) onOpenLogin();
     }
