@@ -4,7 +4,6 @@ export const therapists = [
     name: 'Aria Green', 
     specialty: 'Head Spa & Reflexology', 
     rating: 5.0, 
-    // Using high quality Unsplash placeholders for avatars
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop' 
   },
   { 
@@ -31,55 +30,115 @@ export const therapists = [
 ];
 
 export const services = {
-  headSpa: {
-    id: 'headSpa',
-    name: 'Head Spa',
-    options: [
-      { id: 'h_45', name: '45 min Session', price: 95, duration: 45 },
-      { id: 'h_90', name: '90 min Session', price: 165, duration: 90 },
+  vip1a: {
+    id: 'vip1a',
+    name: 'VIP 1A',
+    price: 88,
+    duration: 65,
+    included: ['Head Spa', 'Head Massage', 'Organic Shampoo'],
+    addOns: []
+  },
+  vip1b: {
+    id: 'vip1b',
+    name: 'VIP 1B',
+    price: 88,
+    duration: 65,
+    included: ['Head Spa', 'Head Massage', 'Face Gua Sha', 'Organic Shampoo'],
+    addOns: []
+  },
+  vip1c: {
+    id: 'vip1c',
+    name: 'VIP 1C',
+    price: 88,
+    duration: 65,
+    included: ['Head Spa', 'Head Massage', 'Neck & Shoulder Massage', 'Organic Shampoo'],
+    addOns: []
+  },
+  vip1d: {
+    id: 'vip1d',
+    name: 'VIP 1D',
+    price: 98,
+    duration: 70,
+    included: ['Head Spa', 'Keratin Hair Treatment'],
+    addOns: []
+  },
+  vip2: {
+    id: 'vip2',
+    name: 'VIP 2',
+    price: 118,
+    duration: 90,
+    included: ['Head Spa', 'Face Massage', 'Neck & Shoulder Massage'],
+    addOns: []
+  },
+  vip3: {
+    id: 'vip3',
+    name: 'VIP 3',
+    price: 148,
+    duration: 110,
+    included: ['Head Spa', 'Face Massage', 'Neck & Shoulder Massage', 'Face Gua Sha', 'Ears Candling'],
+    addOns: []
+  },
+  basic_aqua: {
+    id: 'basic_aqua',
+    name: 'Basic Aqua Head Therapy Spa',
+    price: 48,
+    duration: 45,
+    included: [
+      'Essential oil relaxation', 'Head acupoint', 'Acupressure techniques', 
+      'Hot essential oil scalp massage', 'Herbal cleanse', 'Twice therapeutic hair wash', 
+      'Towel neck stretch', 'Signature Water Head Spa', 'Detox', 'Hair blow dry', 'Head massage'
+    ],
+    addOns: []
+  },
+  vip1_aqua: {
+    id: 'vip1_aqua',
+    name: 'VIP 1: Aqua Head Therapy Spa',
+    price: 88,
+    duration: 65,
+    included: [
+      'Essential oil relaxation', 'Head acupoint', 'Acupressure techniques', 
+      'Hot essential oil scalp massage', 'Herbal cleanse', 'Korea face mask', 
+      'Twice therapeutic hair wash', 'Herbal nourishing', 'Towel neck stretch', 
+      'Signature Water Head Spa', 'Detox', 'Hair blow dry massage'
+    ],
+    addOns: [
+      { id: 'add_facial', name: 'Facial therapy massage', price: 40, duration: 0 }
     ]
   },
-  nailSpa: {
-    id: 'nailSpa',
-    name: 'Nail Spa',
-    options: [
-      { id: 'n_45', name: '45 min Manicure', price: 65, duration: 45 },
-      { id: 'n_90', name: '90 min Mani-Pedi', price: 110, duration: 90 },
+  vip2_aqua: {
+    id: 'vip2_aqua',
+    name: 'VIP 2: Aqua Head Therapy Spa',
+    price: 118,
+    duration: 90,
+    included: [
+      'Essential oil relaxation', 'Head acupoint', 'Acupressure techniques', 
+      'Hot essential oil scalp massage', 'Herbal cleanse', 'Korea face mask', 
+      'Twice therapeutic hair wash', 'Herbal nourishing', 'Towel neck stretch', 
+      'Signature Water Head Spa', 'Detox', 'Hair blow dry', 'Ear massage'
+    ],
+    addOns: [
+      { id: 'add_facial', name: 'Facial therapy massage', price: 40, duration: 0 },
+      { id: 'add_scalp_gua_sha', name: 'Scalp Gua Sha', price: 40, duration: 0 }
     ]
   },
-  footSpa: {
-    id: 'footSpa',
-    name: 'Foot Spa',
-    options: [
-      { id: 'f_30', name: '30 min Reflexology', price: 55, duration: 30 },
-      { id: 'f_60', name: '60 min Full Bath', price: 95, duration: 60 },
-    ]
-  },
-  facialSpa: {
-    id: 'facialSpa',
-    name: 'Facial Spa',
-    options: [
-      { id: 'fa_30', name: '30 min Express Glow', price: 80, duration: 30 },
-      { id: 'fa_60', name: '60 min Holistic Facial', price: 140, duration: 60 },
-    ]
-  },
-  hairCut: {
-    id: 'hairCut',
-    name: 'Hair Cut',
-    options: [
-      { id: 'hc_m', name: 'Male Hair Cut', price: 55, duration: 30 },
-      { 
-        id: 'hc_f', 
-        name: 'Female Hair Cut', 
-        price: 85, 
-        duration: 45, 
-        addOns: [
-          { id: 'add_dye', name: 'Add Dyeing', price: 75, duration: 45 },
-          { id: 'add_perm', name: 'Add Perming', price: 95, duration: 60 },
-          { id: 'add_style', name: 'Add Styling', price: 35, duration: 20 },
-          { id: 'add_curl', name: 'Add Curling', price: 30, duration: 15 },
-        ]
-      }
+  vip3_aqua: {
+    id: 'vip3_aqua',
+    name: 'VIP 3: Aqua Head Therapy Spa',
+    price: 148,
+    duration: 110,
+    included: [
+      'Essential oil relaxation', 'Head acupoint', 'Acupressure techniques', 
+      'Hot essential oil scalp massage', 'Herbal cleanse', 'Korea face mask', 
+      'Twice therapeutic hair wash', 'Herbal nourishing', 'Towel neck stretch', 
+      'Signature Water Head Spa', 'Detox', 'Hair blow dry', 'Scalp Gua Sha', 
+      'Neck & shoulder massage', 'Claw scalp massage', 'Peacock feather relaxation'
+    ],
+    addOns: [
+      { id: 'add_facial', name: 'Facial therapy massage', price: 40, duration: 0 },
+      { id: 'add_ear_candling', name: 'Ear massage candling', price: 35, duration: 0 },
+      { id: 'add_facial_gua_sha', name: 'Facial Gua Sha', price: 48, duration: 0 },
+      { id: 'add_neck_steam', name: 'Neck & shoulder herbal steam', price: 48, duration: 0 },
+      { id: 'add_foot_detox', name: 'Herbal foot detox spa', price: 28, duration: 0 }
     ]
   }
 };

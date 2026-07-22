@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { services } from '../data/bookingData';
 import AlertModal from '../components/AlertModal';
 import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -378,7 +379,7 @@ const StaffDashboard = () => {
                     
                     <div className="text-right flex flex-col md:items-end gap-1">
                       <span className="inline-block px-3 py-1 bg-white rounded-full text-xs font-bold uppercase tracking-wider border border-nature-green/10">
-                        {booking.service}
+                        {services[booking.service]?.name || booking.service}
                       </span>
                       {booking.addOns && booking.addOns.length > 0 && (
                         <span className="text-xs opacity-60">+{booking.addOns.length} Add-on{booking.addOns.length > 1 ? 's' : ''}</span>

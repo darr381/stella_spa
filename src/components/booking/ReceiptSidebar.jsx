@@ -9,18 +9,17 @@ const ReceiptSidebar = ({ state, isMobile }) => {
   let totalTime = 0;
   
   const serviceDef = state.service ? services[state.service] : null;
-  const subOptionDef = serviceDef?.options.find(o => o.id === state.subOption);
   
   let selectedAddOns = [];
-  if (subOptionDef) {
-    totalCost += subOptionDef.price;
-    totalTime += subOptionDef.duration;
+  if (serviceDef) {
+    totalCost += serviceDef.price;
+    totalTime += serviceDef.duration;
     
-    if (subOptionDef.addOns && state.addOns.length > 0) {
-      selectedAddOns = subOptionDef.addOns.filter(a => state.addOns.includes(a.id));
+    if (serviceDef.addOns && state.addOns.length > 0) {
+      selectedAddOns = serviceDef.addOns.filter(a => state.addOns.includes(a.id));
       selectedAddOns.forEach(a => {
         totalCost += a.price;
-        totalTime += a.duration;
+        totalTime += a.duration || 0;
       });
     }
   }
@@ -51,7 +50,7 @@ const ReceiptSidebar = ({ state, isMobile }) => {
       <div className="flex-1 flex flex-col gap-8 overflow-y-auto pr-2 no-scrollbar">
         {/* Service Summary */}
         <AnimatePresence>
-          {serviceDef && subOptionDef && (
+          {serviceDef && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -60,9 +59,8 @@ const ReceiptSidebar = ({ state, isMobile }) => {
               <div className="flex justify-between items-start">
                 <div>
                   <h4 className="font-sans font-medium text-nature-green text-lg">{serviceDef.name}</h4>
-                  <p className="text-sm text-nature-green/70">{subOptionDef.name}</p>
                 </div>
-                <span className="font-serif text-lg text-nature-green">${subOptionDef.price}</span>
+                <span className="font-serif text-lg text-nature-green">${serviceDef.price}</span>
               </div>
               
               {selectedAddOns.length > 0 && (

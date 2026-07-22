@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { collectionGroup, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { services } from '../data/bookingData';
 import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
 import AlertModal from '../components/AlertModal';
 
@@ -166,7 +167,7 @@ const MyAppointments = () => {
                     </div>
                     
                     <div className="mt-2">
-                      <h4 className="font-bold text-nature-green text-lg">{booking.service}</h4>
+                      <h4 className="font-bold text-nature-green text-lg">{services[booking.service]?.name || booking.service}</h4>
                       {booking.addOns && booking.addOns.length > 0 && (
                         <p className="text-sm opacity-70 mt-1">
                           Includes: {booking.addOns.join(', ')}

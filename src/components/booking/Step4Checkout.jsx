@@ -28,14 +28,17 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
     try {
       const assignedId = state.assignedTherapist || state.therapist;
       
-      const serviceCat = Object.values(services).find(c => c.id === state.service);
-      const selectedOption = serviceCat?.options.find(o => o.id === state.subOption);
-      let totalDuration = selectedOption?.duration || 60;
-      if (state.addOns && state.addOns.length > 0 && selectedOption?.addOns) {
-        state.addOns.forEach(addId => {
-          const addOn = selectedOption.addOns.find(a => a.id === addId);
-          if (addOn) totalDuration += addOn.duration;
-        });
+      let totalDuration = state.duration || 60;
+      
+      const serviceDef = services[state.service];
+      if (serviceDef && !state.duration) {
+        totalDuration = serviceDef.duration || 60;
+        if (state.addOns && state.addOns.length > 0 && serviceDef.addOns) {
+          state.addOns.forEach(addId => {
+            const addOn = serviceDef.addOns.find(a => a.id === addId);
+            if (addOn) totalDuration += addOn.duration || 0;
+          });
+        }
       }
 
       // Check double booking
@@ -115,15 +118,22 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
   if (isSuccess) {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    // Format service name
-    const serviceName = state.service ? state.service.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Treatment';
+    const serviceDef = state.service ? services[state.service] : null;
+    const serviceName = serviceDef ? serviceDef.name : 'Treatment';
+    
+    let selectedAddOns = [];
+    if (serviceDef && serviceDef.addOns && state.addOns && state.addOns.length > 0) {
+      selectedAddOns = serviceDef.addOns.filter(a => state.addOns.includes(a.id));
+    }
+    const addOnNames = selectedAddOns.map(a => a.name).join(', ');
+
     const dateStr = state.date ? new Date(state.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
     
     const assignedId = state.assignedTherapist || state.therapist;
     const assignedTherapistObj = therapists.find(t => t.id === assignedId);
     const assignedName = assignedTherapistObj ? assignedTherapistObj.name : 'Staff';
 
-    const messageText = `Hi! This is a reminder for my upcoming booking at NaturaSpa.\n\nService: ${serviceName}\nTherapist: ${assignedName}\nDate: ${dateStr}\nTime: ${state.time}\n\nSee you there!`;
+    const messageText = `Hi! This is a reminder for my upcoming booking at NaturaSpa.\n\nService: ${serviceName}${addOnNames ? `\nAdd-Ons: ${addOnNames}` : ''}\nTherapist: ${assignedName}\nDate: ${dateStr}\nTime: ${state.time}\n\nSee you there!`;
     const encodedText = encodeURIComponent(messageText);
 
     const handleCopy = () => {
@@ -200,11 +210,17 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
              
              <h3 className="font-serif text-3xl text-nature-green mb-6 relative z-10">Appointment Details</h3>
              
-             <div className="flex flex-col gap-5 font-sans text-nature-green/80 relative z-10 mb-8">
+              <div className="flex flex-col gap-5 font-sans text-nature-green/80 relative z-10 mb-8">
                <div className="flex flex-col">
                  <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Service</span>
                  <span className="text-xl font-medium text-nature-green">{serviceName}</span>
                </div>
+               {selectedAddOns.length > 0 && (
+                 <div className="flex flex-col">
+                   <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Add-Ons</span>
+                   <span className="text-xl font-medium text-nature-green">{addOnNames}</span>
+                 </div>
+               )}
                <div className="flex flex-col">
                  <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Therapist</span>
                  <span className="text-xl font-medium text-nature-green">{assignedName}</span>

@@ -19,12 +19,12 @@ const BookingApp = () => {
     step: editBooking ? 3 : 1,
     editBookingId: editBooking?.id || null,
     service: editBooking?.service || null,
-    subOption: null,
     addOns: editBooking?.addOns || [],
     therapist: editBooking?.therapistId || 'any',
     assignedTherapist: editBooking?.therapistId || null,
     date: editBooking?.date || null,
     time: editBooking?.time || null,
+    duration: editBooking?.duration || null,
     user: { name: authUser?.name || '', phone: authUser?.phone || '' }
   });
 

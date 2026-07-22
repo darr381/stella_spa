@@ -44,20 +44,20 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   const allTherapistIds = therapists.filter(t => t.id !== 'any').map(t => t.id);
 
   const totalDuration = useMemo(() => {
-    const serviceCat = Object.values(services).find(c => c.id === state.service);
-    if (!serviceCat) return 60;
-    const selectedOption = serviceCat.options.find(o => o.id === state.subOption);
-    if (!selectedOption) return 60;
+    if (state.duration) return state.duration; // Use existing duration if editing
     
-    let dur = selectedOption.duration || 60;
-    if (state.addOns && state.addOns.length > 0 && selectedOption.addOns) {
+    const serviceDef = services[state.service];
+    if (!serviceDef) return 60;
+    
+    let dur = serviceDef.duration || 60;
+    if (state.addOns && state.addOns.length > 0 && serviceDef.addOns) {
       state.addOns.forEach(addId => {
-        const addOn = selectedOption.addOns.find(a => a.id === addId);
-        if (addOn) dur += addOn.duration;
+        const addOn = serviceDef.addOns.find(a => a.id === addId);
+        if (addOn) dur += addOn.duration || 0;
       });
     }
     return dur;
-  }, [state.service, state.subOption, state.addOns]);
+  }, [state.service, state.addOns, state.duration]);
 
   useEffect(() => {
     const fetchBookings = async () => {
