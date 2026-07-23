@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { services, therapists } from '../../data/bookingData';
+import { services } from '../../data/bookingData';
 import { Clock, User, CalendarDays } from 'lucide-react';
 
 const ReceiptSidebar = ({ state, isMobile }) => {
@@ -24,7 +24,14 @@ const ReceiptSidebar = ({ state, isMobile }) => {
     }
   }
 
-  const selectedTherapist = therapists.find(t => t.id === state.therapist);
+  let therapistName = '';
+  let therapistAvatar = null;
+  if (state.assignedTherapistName) {
+    therapistName = state.assignedTherapistName;
+  } else if (state.therapistDetails) {
+    therapistName = state.therapistDetails.displayName || state.therapistDetails.name;
+    therapistAvatar = state.therapistDetails.profilePicture;
+  }
 
   if (isMobile) {
     return (
@@ -79,22 +86,22 @@ const ReceiptSidebar = ({ state, isMobile }) => {
 
         {/* Therapist Summary */}
         <AnimatePresence>
-          {state.step > 1 && selectedTherapist && (
+          {state.step > 1 && state.therapist && (
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-4 pb-6 border-b border-nature-green/10"
             >
               <div className="w-12 h-12 rounded-full bg-nature-green/5 flex items-center justify-center text-nature-green overflow-hidden">
-                {selectedTherapist.avatar ? (
-                  <img src={selectedTherapist.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                {therapistAvatar ? (
+                  <img src={therapistAvatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-5 h-5" />
                 )}
               </div>
               <div className="flex flex-col">
                 <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">Therapist</span>
-                <span className="text-nature-green font-medium font-sans">{selectedTherapist.name}</span>
+                <span className="text-nature-green font-medium font-sans">{therapistName || 'Staff'}</span>
               </div>
             </motion.div>
           )}
@@ -114,7 +121,7 @@ const ReceiptSidebar = ({ state, isMobile }) => {
               <div className="flex flex-col">
                 <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">Date & Time</span>
                 <span className="text-nature-green font-medium font-sans">
-                  {new Date(state.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {state.time}
+                  {new Date(state.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {state.time}
                 </span>
               </div>
             </motion.div>

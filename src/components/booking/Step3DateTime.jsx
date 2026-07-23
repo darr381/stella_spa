@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { collection, collectionGroup, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { services, therapists } from '../../data/bookingData';
+import { services } from '../../data/bookingData';
 
 const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [bookings, setBookings] = useState([]);
+  const [allTherapists, setAllTherapists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Get midnight today
@@ -21,13 +22,20 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   const startViewDate = new Date(today);
   startViewDate.setDate(today.getDate() + (weekOffset * 7));
 
+  const getLocalISODate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Generate the 7 days for the currently viewed week
   const dates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startViewDate);
     d.setDate(startViewDate.getDate() + i);
     return {
       dateObj: d,
-      iso: d.toISOString().split('T')[0],
+      iso: getLocalISODate(d),
       dayName: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
       dayNum: d.getDate(),
       month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
@@ -35,13 +43,26 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
     };
   });
 
-  const baseTimeSlots = [
-    '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', 
-    '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM', 
-    '09:00 PM', '10:00 PM', '11:00 PM'
-  ];
-  const currentHour = new Date().getHours();
-  const allTherapistIds = therapists.filter(t => t.id !== 'any').map(t => t.id);
+  const baseTimeSlots = useMemo(() => {
+    const slots = [];
+    let currentMins = 11 * 60; // 11:00 AM
+    const endMins = 23 * 60; // 11:00 PM
+    
+    while (currentMins <= endMins) {
+      let h = Math.floor(currentMins / 60);
+      let m = currentMins % 60;
+      let ampm = h >= 12 ? 'PM' : 'AM';
+      let displayH = h % 12;
+      if (displayH === 0) displayH = 12;
+      let displayM = m === 0 ? '00' : '30';
+      const paddedH = displayH < 10 ? `0${displayH}` : `${displayH}`;
+      slots.push(`${paddedH}:${displayM} ${ampm}`);
+      currentMins += 30;
+    }
+    return slots;
+  }, []);
+  
+  const currentMinutes = new Date().getHours() * 60 + new Date().getMinutes();
 
   const totalDuration = useMemo(() => {
     if (state.duration) return state.duration; // Use existing duration if editing
@@ -63,7 +84,7 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
     const fetchBookings = async () => {
       setIsLoading(true);
       try {
-        const todayStr = getToday().toISOString().split('T')[0];
+        const todayStr = getLocalISODate(getToday());
         let q;
         if (state.therapist === 'any') {
           q = query(collectionGroup(db, 'bookings'), where('date', '>=', todayStr));
@@ -78,6 +99,14 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
           fetched.push(doc.data());
         });
         setBookings(fetched);
+
+        // Fetch employees for availability check
+        const empSnapshot = await getDocs(collection(db, 'employees'));
+        const empList = [];
+        empSnapshot.forEach(doc => {
+          empList.push({ id: doc.id, ...doc.data() });
+        });
+        setAllTherapists(empList);
       } catch (err) {
         console.error("Error fetching bookings:", err);
       } finally {
@@ -89,22 +118,24 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   }, [state.therapist]);
 
   const parseTime = (timeStr) => {
-    let [hourStr, modifier] = timeStr.split(' ');
-    let hour = parseInt(hourStr.split(':')[0], 10);
+    let [timePart, modifier] = timeStr.split(' ');
+    let [hourStr, minStr] = timePart.split(':');
+    let hour = parseInt(hourStr, 10);
+    let min = parseInt(minStr, 10);
     if (modifier === 'PM' && hour !== 12) hour += 12;
     if (modifier === 'AM' && hour === 12) hour = 0;
-    return hour * 60;
+    return (hour * 60) + min;
   };
 
   const generateSlotsForDate = (dateObj) => {
     const isToday = dateObj.getTime() === today.getTime();
-    const isoDate = dateObj.toISOString().split('T')[0];
+    const isoDate = getLocalISODate(dateObj);
     const todaysBookings = bookings.filter(b => b.date === isoDate);
     
     return baseTimeSlots.filter(timeStr => {
       const slotStart = parseTime(timeStr);
       // Hide past hours completely
-      return !(isToday && slotStart <= currentHour * 60);
+      return !(isToday && slotStart <= currentMinutes);
     }).map(timeStr => {
       const slotStart = parseTime(timeStr);
       const slotEnd = slotStart + totalDuration;
@@ -119,7 +150,20 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
             busyTherapists.add(b.therapistId);
           }
         });
-        if (busyTherapists.size >= allTherapistIds.length) {
+        
+        allTherapists.forEach(t => {
+          if (t.onLeave?.isOut && t.onLeave?.startDate && t.onLeave?.endDate) {
+            const start = new Date(t.onLeave.startDate);
+            start.setHours(0,0,0,0);
+            const end = new Date(t.onLeave.endDate);
+            end.setHours(23,59,59,999);
+            if (dateObj >= start && dateObj <= end) {
+              busyTherapists.add(t.id);
+            }
+          }
+        });
+        
+        if (busyTherapists.size >= allTherapists.length) {
           available = false;
         }
       } else {
@@ -138,7 +182,7 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   const handleSlotClick = (isoDate, timeStr) => {
     let assigned = state.therapist;
 
-    if (state.therapist === 'any') {
+      if (state.therapist === 'any') {
       const slotStart = parseTime(timeStr);
       const slotEnd = slotStart + totalDuration;
       const todaysBookings = bookings.filter(b => b.date === isoDate);
@@ -152,21 +196,49 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         }
       });
       
-      const freeTherapists = allTherapistIds.filter(id => !busyTherapists.has(id));
+      const slotDate = new Date(isoDate + 'T00:00:00');
+      allTherapists.forEach(t => {
+        if (t.onLeave?.isOut && t.onLeave?.startDate && t.onLeave?.endDate) {
+          const start = new Date(t.onLeave.startDate);
+          start.setHours(0,0,0,0);
+          const end = new Date(t.onLeave.endDate);
+          end.setHours(23,59,59,999);
+          if (slotDate >= start && slotDate <= end) {
+            busyTherapists.add(t.id);
+          }
+        }
+      });
+      
+      const freeTherapists = allTherapists.filter(t => !busyTherapists.has(t.id));
       
       if (freeTherapists.length > 0) {
         const counts = {};
-        freeTherapists.forEach(id => counts[id] = 0);
+        freeTherapists.forEach(t => counts[t.id] = 0);
         todaysBookings.forEach(b => {
           if (counts[b.therapistId] !== undefined) counts[b.therapistId]++;
         });
         
-        freeTherapists.sort((a, b) => counts[a] - counts[b]);
-        assigned = freeTherapists[0]; // pick the one with least bookings
+        freeTherapists.sort((a, b) => {
+          if (counts[a.id] !== counts[b.id]) {
+            return counts[a.id] - counts[b.id];
+          }
+          const nameA = (a.displayName || a.name || '').toLowerCase();
+          const nameB = (b.displayName || b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        assigned = freeTherapists[0].id; // pick the one with least bookings, then A-Z
       }
     }
 
-    updateState({ date: isoDate, time: timeStr, assignedTherapist: assigned });
+    const chosenTherapist = allTherapists.find(t => t.id === assigned);
+    const assignedName = chosenTherapist ? (chosenTherapist.displayName || chosenTherapist.name) : 'Staff';
+
+    updateState({ 
+      date: isoDate, 
+      time: timeStr, 
+      assignedTherapist: assigned,
+      assignedTherapistName: assignedName
+    });
   };
 
   const isComplete = state.date && state.time;
@@ -253,10 +325,10 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
               })}
             </div>
 
-            <div className="w-full h-[2px] bg-nature-green/10 mb-8"></div>
+            <div className="w-full h-[2px] bg-nature-green/10 mb-6"></div>
 
             {/* Time Slots Grid */}
-            <div className="grid grid-cols-7 gap-x-3 md:gap-x-6 px-12 md:px-16 min-h-[350px]">
+            <div className="grid grid-cols-7 gap-x-3 md:gap-x-6 px-12 md:px-16 min-h-[350px] max-h-[55vh] overflow-y-auto pr-4 styled-scrollbar">
               {dates.map((d) => {
                 const slots = generateSlotsForDate(d.dateObj);
                 return (

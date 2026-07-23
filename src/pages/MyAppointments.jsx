@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collectionGroup, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collectionGroup, query, where, getDocs, doc, deleteDoc, collection } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { services } from '../data/bookingData';
-import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2, User } from 'lucide-react';
 import AlertModal from '../components/AlertModal';
 
 const MyAppointments = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
+  const [employees, setEmployees] = useState({});
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
@@ -72,9 +73,17 @@ const MyAppointments = () => {
           return dateA - dateB;
         });
 
+        // Also fetch all employees to map therapistId to names
+        const empSnapshot = await getDocs(collection(db, 'employees'));
+        const empMap = {};
+        empSnapshot.forEach(doc => {
+          empMap[doc.id] = doc.data().displayName || doc.data().name;
+        });
+        setEmployees(empMap);
+
         setBookings(fetchedBookings);
       } catch (err) {
-        console.error("Error fetching appointments:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
@@ -158,7 +167,7 @@ const MyAppointments = () => {
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <span className="font-serif text-2xl font-medium text-lavender">
-                        {new Date(booking.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})}
+                        {new Date(booking.date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})}
                       </span>
                       <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-full border border-nature-green/10 shadow-sm">
                         <Clock className="w-3.5 h-3.5 text-nature-green/70" />
@@ -173,6 +182,10 @@ const MyAppointments = () => {
                           Includes: {booking.addOns.join(', ')}
                         </p>
                       )}
+                      <div className="flex items-center gap-1.5 mt-2 text-nature-green/70 text-sm">
+                        <User className="w-3.5 h-3.5" />
+                        <span>{employees[booking.therapistId] || 'Staff'}</span>
+                      </div>
                     </div>
                   </div>
                   

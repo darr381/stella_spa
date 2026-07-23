@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle2, Copy, Check, ChevronRight, Loader2 } from 'luc
 import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import { collection, addDoc, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
-import { services, therapists } from '../../data/bookingData';
+import { services } from '../../data/bookingData';
 import AlertModal from '../AlertModal';
 
 const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
@@ -92,6 +92,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
         time: state.time,
         duration: totalDuration,
         expireAt: expireDate,
+        status: 'pending',
         createdAt: new Date().toISOString()
       };
       
@@ -127,11 +128,10 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
     }
     const addOnNames = selectedAddOns.map(a => a.name).join(', ');
 
-    const dateStr = state.date ? new Date(state.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
+    const dateStr = state.date ? new Date(state.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
     
     const assignedId = state.assignedTherapist || state.therapist;
-    const assignedTherapistObj = therapists.find(t => t.id === assignedId);
-    const assignedName = assignedTherapistObj ? assignedTherapistObj.name : 'Staff';
+    const assignedName = state.assignedTherapistName || (state.therapistDetails ? (state.therapistDetails.displayName || state.therapistDetails.name) : 'Staff');
 
     const messageText = `Hi! This is a reminder for my upcoming booking at NaturaSpa.\n\nService: ${serviceName}${addOnNames ? `\nAdd-Ons: ${addOnNames}` : ''}\nTherapist: ${assignedName}\nDate: ${dateStr}\nTime: ${state.time}\n\nSee you there!`;
     const encodedText = encodeURIComponent(messageText);

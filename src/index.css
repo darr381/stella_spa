@@ -30,3 +30,28 @@
   
 
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .styled-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .styled-scrollbar::-webkit-scrollbar-track {
+    background: rgba(27, 67, 50, 0.05); 
+    border-radius: 10px;
+  }
+  .styled-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 140, 185, 0.4); 
+    border-radius: 10px;
+  }
+  .styled-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 140, 185, 0.6); 
+  }
+}
