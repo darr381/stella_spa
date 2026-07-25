@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { collectionGroup, query, where, getDocs, doc, deleteDoc, collection } from 'firebase/firestore';
+import { collectionGroup, query, where, getDocs, doc, deleteDoc, collection, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { services } from '../data/bookingData';
-import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2, User } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2, User, Save, X } from 'lucide-react';
 import AlertModal from '../components/AlertModal';
 
 const MyAppointments = () => {
-  const { user } = useAuth();
+  const { user, updateUserSession } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [employees, setEmployees] = useState({});
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileData, setProfileData] = useState({ name: '', phone: '' });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState('');
 
   const handleDelete = (booking) => {
     setModalConfig({
@@ -45,6 +49,91 @@ const MyAppointments = () => {
       });
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    if (!profileData.name.trim() || !profileData.phone.trim()) {
+      setProfileError('Name and phone number are required.');
+      return;
+    }
+    
+    // Validate phone number format (starts with 8 or 9, exactly 8 digits)
+    if (!/^[89]\d{7}$/.test(profileData.phone)) {
+      setProfileError('Handphone number must be 8 digits and start with 8 or 9.');
+      return;
+    }
+
+    setProfileSaving(true);
+    setProfileError('');
+    
+    try {
+      const oldPhone = user.phone;
+      const newPhone = profileData.phone;
+      const newName = profileData.name;
+      
+      // If phone changed, check uniqueness
+      if (oldPhone !== newPhone) {
+        const checkSnap = await getDoc(doc(db, 'users', newPhone));
+        if (checkSnap.exists()) {
+          setProfileError('This phone number is already registered.');
+          setProfileSaving(false);
+          return;
+        }
+        
+        // 1. Create new user doc
+        await setDoc(doc(db, 'users', newPhone), {
+          name: newName,
+          phone: newPhone,
+          createdAt: new Date()
+        });
+        
+        // 2. Delete old user doc
+        await deleteDoc(doc(db, 'users', oldPhone));
+      } else if (user.name !== newName) {
+        // Just update the name
+        await updateDoc(doc(db, 'users', oldPhone), { name: newName });
+      } else {
+        // Nothing changed
+        setShowProfileModal(false);
+        setProfileSaving(false);
+        return;
+      }
+      
+      // Update all bookings for this user across all therapists
+      const bookingsQ = query(collectionGroup(db, 'bookings'), where('customerPhone', '==', oldPhone));
+      const bookingsSnap = await getDocs(bookingsQ);
+      
+      const updatePromises = bookingsSnap.docs.map(docSnap => {
+        // Reconstruct the exact path to this booking document
+        // docSnap.ref gives us the DocumentReference
+        return updateDoc(docSnap.ref, {
+          customerName: newName,
+          customerPhone: newPhone
+        });
+      });
+      
+      await Promise.all(updatePromises);
+      
+      // Update context and close
+      updateUserSession({ id: newPhone, name: newName, phone: newPhone });
+      setShowProfileModal(false);
+      
+      // Show success alert
+      setModalConfig({
+        isOpen: true,
+        type: 'alert',
+        title: 'Profile Updated',
+        message: 'Your profile has been successfully updated.',
+        onConfirm: null
+      });
+      
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setProfileError('An error occurred while saving your profile.');
+    } finally {
+      setProfileSaving(false);
     }
   };
 
@@ -144,13 +233,26 @@ const MyAppointments = () => {
             </p>
           </div>
           
-          <button 
-            onClick={() => navigate('/book')}
-            className="flex items-center gap-2 bg-nature-green text-white hover:bg-nature-greenLight px-6 py-3 rounded-full font-medium shadow-lg transition-all active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-            Book New Appointment
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                setProfileData({ name: user?.name || '', phone: user?.phone || '' });
+                setProfileError('');
+                setShowProfileModal(true);
+              }}
+              className="flex items-center gap-2 bg-white text-nature-green hover:bg-base-cream border border-nature-green/10 px-6 py-3 rounded-full font-medium shadow-sm transition-all active:scale-95"
+            >
+              <User className="w-5 h-5" />
+              Profile
+            </button>
+            <button 
+              onClick={() => navigate('/book')}
+              className="flex items-center gap-2 bg-nature-green text-white hover:bg-nature-greenLight px-6 py-3 rounded-full font-medium shadow-lg transition-all active:scale-95"
+            >
+              <Plus className="w-5 h-5" />
+              New Booking
+            </button>
+          </div>
         </div>
 
         <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-nature-green/5 min-h-[400px]">
@@ -250,6 +352,67 @@ const MyAppointments = () => {
         type={modalConfig.type}
         onConfirm={modalConfig.onConfirm}
       />
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-sm bg-white p-8 rounded-[2rem] shadow-2xl relative">
+            <button 
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 text-black/50"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="font-serif text-2xl text-nature-green mb-6">Edit Profile</h3>
+            
+            {profileError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl">
+                {profileError}
+              </div>
+            )}
+            
+            <form onSubmit={handleSaveProfile} className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">Full Name</label>
+                <input 
+                  type="text" 
+                  value={profileData.name} 
+                  onChange={e => setProfileData({...profileData, name: e.target.value.replace(/[^a-zA-Z\s]/g, '')})}
+                  placeholder="Enter your name"
+                  className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:border-lavender focus:outline-none text-nature-green" 
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">Handphone Number</label>
+                <div className="flex items-center">
+                  <div className="p-3 bg-base-cream/50 rounded-l-xl border border-r-0 border-nature-green/10 text-nature-green font-medium">
+                    +65
+                  </div>
+                  <input 
+                    type="tel" 
+                    value={profileData.phone} 
+                    onChange={e => setProfileData({...profileData, phone: e.target.value.replace(/\D/g, '').slice(0, 8)})}
+                    placeholder="8xxx xxxx or 9xxx xxxx"
+                    className="p-3 bg-base-cream/50 rounded-r-xl border border-nature-green/10 focus:border-lavender focus:outline-none text-nature-green w-full" 
+                    required
+                  />
+                </div>
+                <p className="text-xs text-nature-green/50 mt-1">This will update your login ID.</p>
+              </div>
+              
+              <button 
+                type="submit"
+                disabled={profileSaving}
+                className="mt-4 flex items-center justify-center gap-2 w-full bg-nature-green text-white py-4 rounded-xl font-medium hover:bg-nature-greenLight transition-all active:scale-95 disabled:opacity-50"
+              >
+                {profileSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                {profileSaving ? 'Saving...' : 'Save Profile'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

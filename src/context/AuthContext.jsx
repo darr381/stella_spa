@@ -73,11 +73,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('naturaSpaUser');
   };
 
+  const updateUserSession = (userData) => {
+    setUser(userData);
+    localStorage.setItem('naturaSpaUser', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
+    updateUserSession,
     loading
   };
 

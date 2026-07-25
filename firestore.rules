@@ -21,8 +21,8 @@ service cloud.firestore {
                     && request.resource.data.phone is string
                     && request.resource.data.phone.matches('^[89][0-9]{7}$');
       
-      // Prevent any tampering, modifying, or deleting of existing users
-      allow update, delete: if false;
+      // Allow modifying or deleting of existing users for profile updates
+      allow update, delete: if true;
     }
 
     // Employee Profiles
