@@ -78,9 +78,8 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
         return;
       }
 
-      const expireDate = new Date(state.date);
-      expireDate.setDate(expireDate.getDate() + 1); // Day after
-      expireDate.setHours(23, 59, 59, 999); // End of that day
+      const expireDate = new Date(state.date + 'T00:00:00');
+      expireDate.setHours(23, 59, 59, 999); // End of the booking day
 
       const bookingData = {
         customerName: state.user.name,

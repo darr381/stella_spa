@@ -64,13 +64,26 @@ const MyAppointments = () => {
         );
         
         const snapshot = await getDocs(q);
-        const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const getLocalISODate = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        const todayISO = getLocalISODate(new Date());
+
+        let fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        fetchedBookings = fetchedBookings.filter(b => b.date >= todayISO);
 
         // Sort by date and time
         fetchedBookings.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`);
-          const dateB = new Date(`${b.date}T${b.time}`);
-          return dateA - dateB;
+          const dateA = new Date(`${a.date}T00:00:00`);
+          const dateB = new Date(`${b.date}T00:00:00`);
+          if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+          
+          const timeA = a.time || '';
+          const timeB = b.time || '';
+          return timeA.localeCompare(timeB);
         });
 
         // Also fetch all employees to map therapistId to names

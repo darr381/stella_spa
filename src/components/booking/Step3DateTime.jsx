@@ -8,6 +8,7 @@ import { services } from '../../data/bookingData';
 const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [bookings, setBookings] = useState([]);
+  const [customerBookings, setCustomerBookings] = useState([]);
   const [allTherapists, setAllTherapists] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,6 +101,18 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         });
         setBookings(fetched);
 
+        // Fetch the logged-in customer's own bookings to prevent double-booking themselves
+        if (state.user?.phone) {
+          const custQ = query(collectionGroup(db, 'bookings'), where('customerPhone', '==', state.user.phone), where('date', '>=', todayStr));
+          const custSnap = await getDocs(custQ);
+          const custFetched = [];
+          custSnap.forEach(doc => {
+            if (state.editBookingId && doc.id === state.editBookingId) return;
+            custFetched.push(doc.data());
+          });
+          setCustomerBookings(custFetched);
+        }
+
         // Fetch employees for availability check
         const empSnapshot = await getDocs(collection(db, 'employees'));
         const empList = [];
@@ -175,6 +188,15 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         if (isBooked) available = false;
       }
       
+      // Check if the customer themselves is already booked at this time
+      const todaysCustomerBookings = customerBookings.filter(b => b.date === isoDate);
+      const customerIsBooked = todaysCustomerBookings.some(b => {
+        const bStart = parseTime(b.time);
+        const bEnd = bStart + (b.duration || 60);
+        return slotStart < bEnd && slotEnd > bStart;
+      });
+      if (customerIsBooked) available = false;
+
       return { time: timeStr, available };
     });
   };

@@ -89,13 +89,28 @@ const StaffDashboard = () => {
         // 2. Fetch remaining (future) bookings
         const q = query(collection(db, `therapists/${empData.id}/bookings`));
         const bookingSnap = await getDocs(q);
-        const fetchedBookings = bookingSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        const getLocalISODate = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        const todayISO = getLocalISODate(new Date());
+        
+        let fetchedBookings = bookingSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        fetchedBookings = fetchedBookings.filter(b => b.date >= todayISO);
         
         // Sort bookings by date and time
         fetchedBookings.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`);
-          const dateB = new Date(`${b.date}T${b.time}`);
-          return dateA - dateB;
+          const dateA = new Date(`${a.date}T00:00:00`);
+          const dateB = new Date(`${b.date}T00:00:00`);
+          if (dateA.getTime() !== dateB.getTime()) return dateA - dateB;
+          
+          // Secondary sort by time
+          const timeA = a.time || '';
+          const timeB = b.time || '';
+          return timeA.localeCompare(timeB);
         });
 
         setBookings(fetchedBookings);
