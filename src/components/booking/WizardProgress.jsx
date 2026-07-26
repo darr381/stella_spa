@@ -1,14 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-
-const steps = [
-  { num: 1, title: 'Spa' },
-  { num: 2, title: 'Therapist' },
-  { num: 3, title: 'Time' },
-  { num: 4, title: 'Details' }
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const WizardProgress = ({ currentStep }) => {
+  const { t } = useLanguage();
+
+  const steps = [
+    { num: 1, title: t('booking.progressSpa') },
+    { num: 2, title: t('booking.progressTherapist') },
+    { num: 3, title: t('booking.progressTime') },
+    { num: 4, title: t('booking.progressDetails') }
+  ];
+
   return (
     <div className="flex items-center justify-between relative w-full px-2">
       {/* Background Line */}

@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const BookingTeaser = ({ onOpenLogin }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleBookClick = (e) => {
     if (e) e.preventDefault();
@@ -30,14 +32,14 @@ const BookingTeaser = ({ onOpenLogin }) => {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-4xl md:text-5xl text-white font-serif mb-6 drop-shadow-md">
-            Ready to Find Your Peace?
+            {t('landing.teaserTitle')}
           </h2>
           <p className="text-white/90 font-sans text-lg mb-10 max-w-xl mx-auto drop-shadow-md">
-            Secure your moment of tranquility. Our botanical sanctuary awaits to restore your natural harmony with the calming essence of lavender.
+            {t('landing.teaserSub')}
           </p>
           <button onClick={handleBookClick} className="bg-white text-nature-green hover:bg-lavender hover:text-white px-10 py-4 rounded-full font-sans font-medium text-lg transition-all duration-300 shadow-xl hover:shadow-[0_0_20px_rgba(156,140,185,0.5)] flex w-fit items-center justify-center mx-auto gap-3">
             <Calendar className="w-5 h-5" />
-            Book Your Appointment
+            {t('landing.bookAppointment')}
           </button>
         </motion.div>
       </div>

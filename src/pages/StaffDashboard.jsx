@@ -6,8 +6,10 @@ import { services } from '../data/bookingData';
 import AlertModal from '../components/AlertModal';
 import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const StaffDashboard = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -151,17 +153,17 @@ const StaffDashboard = () => {
           endDate: onLeave.isOut ? onLeave.endDate : ''
         }
       });
-      showToast('Changes have been saved');
+      showToast(t('staff.changesSaved'));
     } catch (err) {
       console.error("Error updating profile:", err);
-      showToast('Failed to save changes', 'error');
+      showToast(t('staff.saveFailed'), 'error');
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-base-cream flex items-center justify-center font-serif text-2xl text-nature-green">Loading...</div>;
+    return <div className="min-h-screen bg-base-cream flex items-center justify-center font-serif text-2xl text-nature-green">{t('staff.loading')}</div>;
   }
 
   return (
@@ -180,12 +182,12 @@ const StaffDashboard = () => {
             )}
             <div>
               <h1 className="font-serif text-2xl font-medium">{employee.displayName}</h1>
-              <p className="text-sm opacity-60">Staff Dashboard</p>
+              <p className="text-sm opacity-60">{t('staff.dashboard')}</p>
             </div>
           </div>
           <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 hover:bg-red-50 px-4 py-2 rounded-full transition-colors font-medium">
             <LogOut className="w-4 h-4" />
-            Sign Out
+            {t('staff.signOut')}
           </button>
         </div>
       </header>
@@ -197,7 +199,7 @@ const StaffDashboard = () => {
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-nature-green/5">
             <div className="flex items-center gap-3 mb-6 border-b border-nature-green/10 pb-4">
               <User className="w-5 h-5 opacity-70" />
-              <h2 className="font-serif text-xl">Profile Settings</h2>
+              <h2 className="font-serif text-xl">{t('staff.profileSettings')}</h2>
             </div>
             
             <form onSubmit={handleSaveProfile} className="flex flex-col gap-5">
@@ -214,7 +216,7 @@ const StaffDashboard = () => {
                 </div>
                 <label className="cursor-pointer">
                   <span className="text-sm font-medium text-nature-green bg-nature-green/10 hover:bg-nature-green/20 px-4 py-2 rounded-full transition-colors">
-                    Change Profile Pic
+                    {t('staff.changePic')}
                   </span>
                   <input 
                     type="file" 
@@ -263,7 +265,7 @@ const StaffDashboard = () => {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">Display Name</label>
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70">{t('staff.displayName')}</label>
                 <input 
                   type="text" 
                   value={name} 
@@ -285,27 +287,27 @@ const StaffDashboard = () => {
 
               <div className="flex items-center gap-3 mt-4 border-t border-nature-green/10 pt-6 mb-2">
                 <Clock className="w-5 h-5 opacity-70" />
-                <h3 className="font-serif text-lg">Working Hours</h3>
+                <h3 className="font-serif text-lg">{t('staff.workingHours')}</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">Shift Start</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">{t('staff.shiftStart')}</label>
                   <input type="time" value={hours.start} onChange={e => setHours({...hours, start: e.target.value})} className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:outline-none" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">Shift End</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">{t('staff.shiftEnd')}</label>
                   <input type="time" value={hours.end} onChange={e => setHours({...hours, end: e.target.value})} className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:outline-none" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">Lunch Start</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">{t('staff.lunchStart')}</label>
                   <input type="time" value={hours.lunchStart} onChange={e => setHours({...hours, lunchStart: e.target.value})} className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:outline-none" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">Lunch End</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider opacity-70">{t('staff.lunchEnd')}</label>
                   <input type="time" value={hours.lunchEnd} onChange={e => setHours({...hours, lunchEnd: e.target.value})} className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:outline-none" />
                 </div>
               </div>
@@ -313,7 +315,7 @@ const StaffDashboard = () => {
               <div className="flex items-center justify-between mt-4 border-t border-nature-green/10 pt-6 mb-2">
                 <div className="flex items-center gap-3">
                   <CalendarX2 className="w-5 h-5 opacity-70" />
-                  <h3 className="font-serif text-lg">Leave Status</h3>
+                  <h3 className="font-serif text-lg">{t('staff.leaveStatus')}</h3>
                 </div>
                 <button 
                   type="button"
@@ -323,14 +325,14 @@ const StaffDashboard = () => {
                   }}
                   className="px-4 py-2 bg-lavender/10 text-lavender rounded-full text-sm font-medium hover:bg-lavender/20 transition-colors"
                 >
-                  Set Leave
+                  {t('staff.setLeave')}
                 </button>
               </div>
 
               {onLeave.isOut && onLeave.startDate && onLeave.endDate && (
                 <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex justify-between items-center mt-2 animate-in fade-in slide-in-from-top-2">
                   <div className="flex flex-col">
-                    <span className="text-red-800 font-medium text-sm">Scheduled Leave</span>
+                    <span className="text-red-800 font-medium text-sm">{t('staff.scheduledLeave')}</span>
                     <span className="text-red-600 text-xs mt-1 font-medium">
                       {new Date(onLeave.startDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})} to {new Date(onLeave.endDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
                     </span>
@@ -339,7 +341,7 @@ const StaffDashboard = () => {
                     type="button"
                     onClick={() => setOnLeave({ isOut: false, startDate: '', endDate: '' })}
                     className="text-red-500 hover:text-red-700 hover:bg-red-100 p-2 rounded-full transition-colors"
-                    title="Cancel Leave"
+                    title={t('staff.cancelLeave')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -352,7 +354,7 @@ const StaffDashboard = () => {
                 className="mt-6 flex items-center justify-center gap-2 bg-nature-green text-white py-4 rounded-xl font-medium hover:bg-nature-greenLight transition-colors disabled:opacity-50"
               >
                 <Save className="w-5 h-5" />
-                {saving ? 'Saving...' : 'Save Profile Changes'}
+                {saving ? t('appointments.saving') : t('staff.saveProfile')}
               </button>
             </form>
           </div>
@@ -364,18 +366,18 @@ const StaffDashboard = () => {
             <div className="flex justify-between items-center border-b border-nature-green/10 pb-6 mb-6">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="w-6 h-6 text-lavender" />
-                <h2 className="font-serif text-2xl">Upcoming Appointments</h2>
+                <h2 className="font-serif text-2xl">{t('staff.upcomingAppointments')}</h2>
               </div>
               <div className="text-sm font-medium opacity-60 bg-base-cream px-4 py-2 rounded-full">
-                {bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'}
+                {bookings.length} {bookings.length === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}
               </div>
             </div>
 
             {bookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-center opacity-60">
                 <CalendarIcon className="w-12 h-12 mb-4 opacity-20" />
-                <p className="text-lg">Your schedule is completely clear.</p>
-                <p className="text-sm mt-1">Enjoy the tranquility.</p>
+                <p className="text-lg">{t('staff.scheduleClear')}</p>
+                <p className="text-sm mt-1">{t('staff.enjoyTranquility')}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -397,7 +399,7 @@ const StaffDashboard = () => {
                         {services[booking.service]?.name || booking.service}
                       </span>
                       {booking.addOns && booking.addOns.length > 0 && (
-                        <span className="text-xs opacity-60">+{booking.addOns.length} Add-on{booking.addOns.length > 1 ? 's' : ''}</span>
+                        <span className="text-xs opacity-60">+{booking.addOns.length} {booking.addOns.length > 1 ? t('staff.addons') : t('staff.addon')}</span>
                       )}
                     </div>
                   </div>
@@ -419,11 +421,11 @@ const StaffDashboard = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="font-serif text-2xl text-nature-green mb-6">Schedule Leave</h3>
+            <h3 className="font-serif text-2xl text-nature-green mb-6">{t('staff.scheduleLeaveTitle')}</h3>
             
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">Start Date</label>
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">{t('staff.startDate')}</label>
                 <input 
                   type="date" 
                   value={tempLeave.startDate} 
@@ -432,7 +434,7 @@ const StaffDashboard = () => {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">End Date</label>
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">{t('staff.endDate')}</label>
                 <input 
                   type="date" 
                   value={tempLeave.endDate} 
@@ -450,14 +452,14 @@ const StaffDashboard = () => {
                   } else {
                     setModalConfig({
                       isOpen: true,
-                      title: 'Missing Dates',
-                      message: 'Please select both start and end dates.'
+                      title: t('staff.missingDates'),
+                      message: t('staff.missingDatesDesc')
                     });
                   }
                 }}
                 className="mt-4 w-full bg-nature-green text-white py-4 rounded-xl font-medium hover:bg-nature-greenLight transition-all active:scale-95"
               >
-                Confirm Leave Range
+                {t('staff.confirmLeave')}
               </button>
             </div>
           </div>

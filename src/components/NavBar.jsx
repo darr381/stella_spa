@@ -3,12 +3,14 @@ import { Leaf, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const handleBookClick = (e) => {
     if (e) e.preventDefault();
@@ -47,7 +49,12 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
     return () => { document.body.style.overflow = 'unset'; }
   }, [mobileMenuOpen]);
 
-  const navLinks = ['Home', 'Services', 'About', 'Testimonials'];
+  const navLinks = [
+    { key: 'nav.home', href: 'home' }, 
+    { key: 'nav.services', href: 'services' }, 
+    { key: 'nav.about', href: 'about' }, 
+    { key: 'nav.testimonials', href: 'testimonials' }
+  ];
 
   return (
     <>
@@ -67,9 +74,9 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
           {/* Desktop Menu */}
           <ul className={`hidden md:flex items-center gap-8 font-sans text-sm font-medium transition-colors ${scrolled ? 'text-nature-green' : 'text-white'}`}>
             {navLinks.map((link) => (
-              <li key={link}>
-                <a href={`#${link.toLowerCase()}`} className="hover:text-lavender transition-colors">
-                  {link}
+              <li key={link.href}>
+                <a href={`#${link.href}`} className="hover:text-lavender transition-colors">
+                  {t(link.key)}
                 </a>
               </li>
             ))}
@@ -78,7 +85,7 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
                 onClick={onOpenStaffLogin}
                 className="hover:text-lavender transition-colors flex items-center font-medium"
               >
-                Employee Portal
+                {t('nav.staffLogin')}
               </button>
             </li>
           </ul>
@@ -100,14 +107,14 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
                     : 'border-white text-white hover:bg-white/10'
                 }`}
               >
-                Sign Out
+                {t('nav.logout')}
               </button>
               <button type="button" onClick={handleBookClick} className={`px-6 py-2 rounded-full font-sans text-sm font-medium transition-all duration-300 ${
                 scrolled 
                   ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
                   : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
               }`}>
-                Book Now
+                {t('nav.bookNow')}
               </button>
             </div>
           ) : (
@@ -116,7 +123,7 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
                 ? 'bg-nature-green text-white hover:bg-nature-greenLight' 
                 : 'bg-white text-nature-green hover:bg-lavender hover:text-white'
             }`}>
-              Book Now
+              {t('nav.bookNow')}
             </button>
           )}
 
@@ -148,17 +155,17 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
             <ul className="flex flex-col items-center gap-10 font-serif text-3xl text-nature-green">
               {navLinks.map((link, idx) => (
                 <motion.li 
-                  key={link}
+                  key={link.href}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + idx * 0.05 }}
                 >
                   <a 
-                    href={`#${link.toLowerCase()}`} 
+                    href={`#${link.href}`} 
                     className="hover:text-lavender transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {link}
+                    {t(link.key)}
                   </a>
                 </motion.li>
               ))}
@@ -172,7 +179,7 @@ const NavBar = ({ onOpenLogin, onOpenStaffLogin }) => {
                 onClick={handleMobileBookClick}
                 className="mt-14 block bg-nature-green text-white hover:bg-nature-greenLight px-12 py-4 rounded-full font-sans text-lg font-medium shadow-lg transition-all active:scale-95"
               >
-                Book Appointment
+                {t('nav.bookNow')}
               </button>
             </motion.div>
           </motion.div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const services = [
   {
@@ -35,6 +36,8 @@ const services = [
 ];
 
 const ServicesGrid = () => {
+  const { t } = useLanguage();
+
   return (
     <section id="services" className="relative bg-base-cream py-32 px-6">
       <div className="max-w-7xl mx-auto">
@@ -45,10 +48,10 @@ const ServicesGrid = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl text-nature-green mb-6">The Botanical Menu</h2>
+          <h2 className="text-4xl md:text-5xl text-nature-green mb-6">{t('landing.servicesTitle')}</h2>
           <div className="w-24 h-1 bg-lavender mx-auto rounded-full mb-6"></div>
           <p className="text-nature-greenLight font-sans max-w-2xl mx-auto text-lg">
-            Experience our meticulously crafted treatments, blending modern luxury with the ancient healing power of nature and fields of lavender.
+            {t('landing.servicesSub')}
           </p>
         </motion.div>
 

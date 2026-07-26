@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Star, Check, ArrowLeft, User, CalendarX2 } from 'lucide-react';
 import { db } from '../../firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
+  const { t } = useLanguage();
   const [therapists, setTherapists] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,8 +22,8 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
         // Add "Any Available" option explicitly
         employeesList.push({
           id: 'any',
-          name: 'Any Available Therapist',
-          specialty: 'First Available',
+          name: t('booking.anyTherapist'),
+          specialty: t('booking.noPreference'),
           profilePicture: null
         });
         
@@ -43,12 +45,12 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
       className="flex flex-col gap-10"
     >
       <div>
-        <h2 className="font-serif text-3xl text-nature-green mb-2">Choose Your Therapist</h2>
-        <p className="text-nature-green/60 font-sans">Select a specialist for your appointment.</p>
+        <h2 className="font-serif text-3xl text-nature-green mb-2">{t('booking.selectTherapist')}</h2>
+        <p className="text-nature-green/60 font-sans">{t('booking.selectTherapistDesc')}</p>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10 text-nature-green">Loading specialists...</div>
+        <div className="flex justify-center py-10 text-nature-green">{t('booking.loadingSpecialists')}</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {therapists.map(therapist => {
@@ -77,11 +79,11 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
                 
                 <div className="flex flex-col items-start flex-1 text-left">
                   <span className="font-sans font-medium text-nature-green text-xl">{therapist.displayName || therapist.name}</span>
-                  <span className="text-nature-green/70 text-sm mb-2">Specialist</span>
+                  <span className="text-nature-green/70 text-sm mb-2">{t('booking.specialist')}</span>
                   {isOnLeave && therapist.onLeave?.startDate && therapist.onLeave?.endDate && (
                     <div className="flex items-center gap-1 text-red-500 bg-red-50 px-2 py-1 rounded-md mt-1">
                       <CalendarX2 className="w-3 h-3" />
-                      <span className="text-xs font-medium">Leave: {new Date(therapist.onLeave.startDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})} - {new Date(therapist.onLeave.endDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                      <span className="text-xs font-medium">{t('booking.leave')}: {new Date(therapist.onLeave.startDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})} - {new Date(therapist.onLeave.endDate).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
                     </div>
                   )}
                 </div>
@@ -102,14 +104,14 @@ const Step2Therapist = ({ state, updateState, onNext, onBack }) => {
           onClick={onBack}
           className="px-6 py-4 rounded-full font-sans text-nature-green hover:bg-nature-green/10 transition-colors flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> {t('booking.back')}
         </button>
         <button 
           onClick={onNext}
           disabled={!state.therapist}
           className="px-10 py-4 rounded-full font-sans text-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-nature-green text-white hover:bg-nature-greenLight shadow-lg hover:shadow-xl active:scale-95"
         >
-          Select Date & Time
+          {t('booking.continueDate')}
         </button>
       </div>
     </motion.div>

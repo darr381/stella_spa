@@ -6,8 +6,10 @@ import { db } from '../../firebase';
 import { collection, addDoc, getDocs, query, where, doc, updateDoc } from 'firebase/firestore';
 import { services } from '../../data/bookingData';
 import AlertModal from '../AlertModal';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -150,14 +152,14 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
         <div className="w-20 h-20 rounded-full bg-nature-green/10 flex items-center justify-center text-nature-green mb-2">
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <h2 className="font-serif text-5xl text-nature-green">Booking Confirmed</h2>
+        <h2 className="font-serif text-5xl text-nature-green">{t('booking.bookingConfirmed')}</h2>
         
         <div className="flex flex-col lg:flex-row gap-6 w-full max-w-5xl mx-auto mt-4 px-4">
           
           {/* Share Box */}
           <div className="flex-1 bg-white p-8 rounded-[2rem] border border-nature-green/5 shadow-sm flex flex-col justify-center">
             <p className="text-nature-green font-sans text-lg font-medium leading-relaxed mb-8">
-              Would you like to save your booking details by sending it to yourself in WhatsApp, Telegram, or Email?
+              {t('booking.savingBooking')}
             </p>
             
             <div className="flex justify-center gap-6 md:gap-8 items-center mb-6">
@@ -197,7 +199,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
 
             {!isMobile && (
               <p className="text-sm text-nature-green/50 italic px-4 mt-auto">
-                * Only mobile devices can send booking details to WhatsApp and Telegram.
+                {t('booking.onlyMobile')}
               </p>
             )}
           </div>
@@ -207,33 +209,33 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
              {/* decorative blob */}
              <div className="absolute top-0 right-0 w-48 h-48 bg-nature-green/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
              
-             <h3 className="font-serif text-3xl text-nature-green mb-6 relative z-10">Appointment Details</h3>
+             <h3 className="font-serif text-3xl text-nature-green mb-6 relative z-10">{t('booking.appointmentDetails')}</h3>
              
               <div className="flex flex-col gap-5 font-sans text-nature-green/80 relative z-10 mb-8">
                <div className="flex flex-col">
-                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Service</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('appointments.service')}</span>
                  <span className="text-xl font-medium text-nature-green">{serviceName}</span>
                </div>
                {selectedAddOns.length > 0 && (
                  <div className="flex flex-col">
-                   <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Add-Ons</span>
+                   <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('appointments.addOns')}</span>
                    <span className="text-xl font-medium text-nature-green">{addOnNames}</span>
                  </div>
                )}
                <div className="flex flex-col">
-                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Therapist</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('appointments.therapist')}</span>
                  <span className="text-xl font-medium text-nature-green">{assignedName}</span>
                </div>
                <div className="flex flex-col">
-                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Date</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('appointments.date')}</span>
                  <span className="text-xl font-medium text-nature-green">{dateStr}</span>
                </div>
                <div className="flex flex-col">
-                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Time</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('appointments.time')}</span>
                  <span className="text-xl font-medium text-nature-green">{state.time}</span>
                </div>
                <div className="flex flex-col">
-                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">Guest</span>
+                 <span className="text-xs font-bold uppercase tracking-widest text-nature-green/40">{t('booking.guest')}</span>
                  <span className="text-xl font-medium text-nature-green">{state.user.name}</span>
                </div>
              </div>
@@ -249,12 +251,12 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
                {isCopied ? (
                  <>
                    <Check className="w-5 h-5" />
-                   <span>Copied to Clipboard!</span>
+                   <span>{t('booking.copiedToClipboard')}</span>
                  </>
                ) : (
                  <>
                    <Copy className="w-5 h-5" />
-                   <span>Copy Booking Details for Easy Pasting</span>
+                   <span>{t('booking.copyDetails')}</span>
                  </>
                )}
              </button>
@@ -266,7 +268,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
           onClick={() => navigate('/my-appointments')}
           className="mt-8 bg-nature-green text-white hover:bg-nature-greenLight px-10 py-4 rounded-full font-sans text-lg font-medium shadow-xl transition-all active:scale-95"
         >
-          Return to My Appointments
+          {t('booking.backToMy')}
         </button>
       </motion.div>
     );
@@ -280,19 +282,19 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
       className="flex flex-col gap-10"
     >
       <div>
-        <h2 className="font-serif text-3xl text-nature-green mb-2">Final Details</h2>
-        <p className="text-nature-green/60 font-sans">Who will we be pampering today?</p>
+        <h2 className="font-serif text-3xl text-nature-green mb-2">{t('booking.finalDetails')}</h2>
+        <p className="text-nature-green/60 font-sans">{t('booking.pamperingDesc')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Name</label>
+          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">{t('booking.nameLabel')}</label>
           <input 
             type="text" 
             name="name"
             value={state.user.name}
             onChange={handleInputChange}
-            placeholder="E.g. Jane Doe"
+            placeholder={t('booking.egJaneDoe')}
             className="p-4 rounded-2xl border-2 border-white bg-white focus:outline-none focus:border-lavender/50 transition-colors shadow-sm text-nature-green font-medium font-sans text-lg"
             required
           />
@@ -300,7 +302,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
         
         
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">Phone Number</label>
+          <label className="text-sm font-medium text-nature-green/80 uppercase tracking-wider pl-2">{t('booking.phoneLabel')}</label>
           <input 
             type="tel" 
             name="phone"
@@ -318,7 +320,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
             onClick={onBack}
             className="px-6 py-4 rounded-full font-sans text-nature-green hover:bg-nature-green/10 transition-colors flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" /> {t('booking.back')}
           </button>
           <button 
             type="submit"
@@ -329,7 +331,7 @@ const Step4Checkout = ({ state, updateState, onBack, onComplete }) => {
                 : 'bg-nature-green/20 text-white cursor-not-allowed'
             }`}
           >
-            {isSubmitting ? 'Confirming...' : 'Confirm Appointment'}
+            {isSubmitting ? t('booking.confirming') : t('booking.confirmAppointment')}
           </button>
         </div>
       </form>

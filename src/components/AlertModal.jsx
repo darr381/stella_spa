@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, HelpCircle } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 const AlertModal = ({ isOpen, onClose, title, message, type = 'alert', onConfirm }) => {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
   return (
@@ -39,7 +42,7 @@ const AlertModal = ({ isOpen, onClose, title, message, type = 'alert', onConfirm
                 onClick={onClose}
                 className="flex-1 py-3 px-6 rounded-full font-medium transition-colors bg-base-cream text-nature-green hover:bg-nature-green/10"
               >
-                Cancel
+                {t('appointments.cancel')}
               </button>
             )}
             <button
@@ -50,7 +53,7 @@ const AlertModal = ({ isOpen, onClose, title, message, type = 'alert', onConfirm
                   : 'bg-nature-green hover:bg-nature-greenLight shadow-nature-green/20'
               }`}
             >
-              {type === 'confirm' ? 'Yes, I am sure' : 'Okay'}
+              {type === 'confirm' ? t('modals.yesSure') : t('modals.okay')}
             </button>
           </div>
         </motion.div>

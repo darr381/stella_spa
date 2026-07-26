@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const StaffLoginModal = ({ isOpen, onClose }) => {
   const [mode, setMode] = useState('login'); // 'login' or 'register'
@@ -13,6 +14,7 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   if (!isOpen) return null;
 
@@ -113,10 +115,10 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
             {mode === 'login' ? <KeyRound className="w-10 h-10 opacity-80" /> : <UserPlus className="w-10 h-10 opacity-80" />}
           </div>
           <h2 className="text-3xl font-bold tracking-tight font-heading text-forest-green">
-            {mode === 'login' ? 'Staff Portal' : 'Create Employee'}
+            {mode === 'login' ? t('modals.staffPortal') : t('modals.createEmployee')}
           </h2>
           <p className="mt-2 text-sm text-forest-green/70 font-sans">
-            {mode === 'login' ? 'Please enter your employee credentials.' : 'Register a new employee profile.'}
+            {mode === 'login' ? t('modals.employeeDetails') : t('modals.registerEmployee')}
           </p>
         </div>
 
@@ -136,14 +138,14 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
                 className="overflow-hidden"
               >
                 <label className="block mb-2 text-sm font-medium text-forest-green font-sans">
-                  First Name
+                  {t('modals.firstName')}
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z]/g, ''))}
                   className="w-full px-4 py-3 bg-white border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender font-sans transition-all"
-                  placeholder="e.g. Jane"
+                  placeholder={t('modals.egJane')}
                   required={mode === 'register'}
                 />
               </motion.div>
@@ -152,28 +154,28 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
           
           <div>
             <label className="block mb-2 text-sm font-medium text-forest-green font-sans">
-              Handphone Number
+              {t('modals.phoneLabel')}
             </label>
             <input
               type="tel"
               value={phone}
               onChange={handlePhoneChange}
               className="w-full px-4 py-3 bg-white border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender font-sans transition-all"
-              placeholder="e.g. 91234567"
+              placeholder={t('modals.egPhone')}
               required
             />
           </div>
 
           <div>
             <label className="block mb-2 text-sm font-medium text-forest-green font-sans">
-              Password
+              {t('modals.password')}
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 bg-white border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender font-sans transition-all"
-              placeholder="Enter your password"
+              placeholder={t('modals.enterPassword')}
               required
             />
           </div>
@@ -187,10 +189,10 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>{mode === 'login' ? 'Authenticating...' : 'Creating...'}</span>
+                  <span>{mode === 'login' ? t('modals.authenticating') : t('modals.creating')}</span>
                 </>
               ) : (
-                <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
+                <span>{mode === 'login' ? t('modals.signIn') : t('modals.createAccount')}</span>
               )}
             </button>
             
@@ -202,7 +204,7 @@ const StaffLoginModal = ({ isOpen, onClose }) => {
               }}
               className="w-full py-3 text-forest-green transition-all bg-transparent hover:bg-forest-green/5 active:scale-95 rounded-xl font-sans font-medium text-sm"
             >
-              {mode === 'login' ? 'Create a new employee account' : 'Back to login'}
+              {mode === 'login' ? t('modals.createNewEmployee') : t('modals.backToLoginMode')}
             </button>
           </div>
         </form>

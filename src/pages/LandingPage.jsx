@@ -6,10 +6,12 @@ import BookingTeaser from '../components/BookingTeaser';
 import CanvasSequence from '../components/CanvasSequence';
 import LoginModal from '../components/LoginModal';
 import StaffLoginModal from '../components/StaffLoginModal';
+import { useLanguage } from '../context/LanguageContext';
 
 function LandingPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isStaffLoginModalOpen, setIsStaffLoginModalOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="relative w-full selection:bg-lavender selection:text-white">
@@ -27,7 +29,7 @@ function LandingPage() {
             <BookingTeaser onOpenLogin={() => setIsLoginModalOpen(true)} />
             <footer className="relative z-10 border-t border-white/10 text-center py-8">
               <p className="text-white/80 font-sans text-sm">
-                &copy; {new Date().getFullYear()} NaturaSpa. All rights reserved.
+                &copy; {new Date().getFullYear()} {t('landing.footerRights')}
               </p>
             </footer>
           </div>

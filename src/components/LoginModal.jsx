@@ -3,6 +3,7 @@ import { X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 const LoginModal = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
@@ -14,8 +15,10 @@ const LoginModal = ({ isOpen, onClose }) => {
   
   const isPhoneValid = phone.length === 8 && (phone.startsWith('8') || phone.startsWith('9'));
   
+  
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   if (!isOpen) return null;
 
@@ -96,10 +99,10 @@ const LoginModal = ({ isOpen, onClose }) => {
           <>
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-bold tracking-tight font-heading text-forest-green">
-                Welcome
+                {t('modals.welcome')}
               </h2>
           <p className="mt-2 text-sm text-forest-green/70 font-sans">
-            Please enter your details to book an appointment.
+            {t('modals.loginInstruction')}
           </p>
         </div>
 
@@ -112,28 +115,28 @@ const LoginModal = ({ isOpen, onClose }) => {
           
           <div>
             <label className="block mb-2 text-sm font-medium text-forest-green font-sans">
-              First Name
+              {t('modals.firstName')}
             </label>
             <input
               type="text"
               value={name}
               onChange={handleNameChange}
               className="w-full px-4 py-3 bg-white border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender font-sans transition-all"
-              placeholder="e.g. Jane"
+              placeholder={t('modals.egJane')}
               required
             />
           </div>
 
           <div>
             <label className="block mb-2 text-sm font-medium text-forest-green font-sans">
-              Handphone Number (8 digits)
+              {t('modals.phoneLabel')}
             </label>
             <input
               type="tel"
               value={phone}
               onChange={handlePhoneChange}
               className="w-full px-4 py-3 bg-white border border-black/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-lavender font-sans transition-all"
-              placeholder="e.g. 91234567"
+              placeholder={t('modals.egPhone')}
               maxLength={8}
               required
             />
@@ -166,10 +169,10 @@ const LoginModal = ({ isOpen, onClose }) => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Processing...</span>
+                  <span>{t('modals.processing')}</span>
                 </>
               ) : (
-                <span>Continue to Booking</span>
+                <span>{t('modals.continueBooking')}</span>
               )}
               </button>
             </div>
@@ -178,10 +181,10 @@ const LoginModal = ({ isOpen, onClose }) => {
         ) : (
           <div className="text-center py-4 animate-in fade-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-bold tracking-tight font-heading text-forest-green mb-4">
-              Account Not Found
+              {t('modals.accountNotFound')}
             </h2>
             <p className="text-forest-green/80 font-sans mb-8 leading-relaxed">
-              We couldn't find an existing account with the handphone number <strong className="text-forest-green">{phone}</strong>. Would you like to create a new account?
+              {t('modals.accountNotFoundText1')} <strong className="text-forest-green">{phone}</strong>. {t('modals.accountNotFoundText2')}
             </p>
             {error && (
               <div className="p-3 text-sm text-red-600 bg-red-50 rounded-xl mb-6">
@@ -197,10 +200,10 @@ const LoginModal = ({ isOpen, onClose }) => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Creating Account...</span>
+                    <span>{t('modals.creatingAccount')}</span>
                   </>
                 ) : (
-                  <span>Create Now</span>
+                  <span>{t('modals.createNow')}</span>
                 )}
               </button>
               <button
@@ -208,7 +211,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 disabled={isSubmitting}
                 className="w-full py-4 text-forest-green transition-all bg-white border border-forest-green/20 hover:bg-forest-green/5 active:scale-95 rounded-xl font-sans font-medium flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Back to Login
+                {t('modals.backToLogin')}
               </button>
             </div>
           </div>

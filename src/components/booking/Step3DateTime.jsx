@@ -4,8 +4,10 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { collection, collectionGroup, query, getDocs, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { services } from '../../data/bookingData';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
+  const { t } = useLanguage();
   const [weekOffset, setWeekOffset] = useState(0);
   const [bookings, setBookings] = useState([]);
   const [customerBookings, setCustomerBookings] = useState([]);
@@ -85,6 +87,14 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
     const fetchBookings = async () => {
       setIsLoading(true);
       try {
+        // Fetch employees for availability check FIRST to prevent query errors from breaking it
+        const empSnapshot = await getDocs(collection(db, 'employees'));
+        const empList = [];
+        empSnapshot.forEach(doc => {
+          empList.push({ id: doc.id, ...doc.data() });
+        });
+        setAllTherapists(empList);
+
         const todayStr = getLocalISODate(getToday());
         let q;
         if (state.therapist === 'any') {
@@ -102,24 +112,24 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         setBookings(fetched);
 
         // Fetch the logged-in customer's own bookings to prevent double-booking themselves
+        // Removed the date filter to avoid requiring a composite collectionGroup index
         if (state.user?.phone) {
-          const custQ = query(collectionGroup(db, 'bookings'), where('customerPhone', '==', state.user.phone), where('date', '>=', todayStr));
-          const custSnap = await getDocs(custQ);
-          const custFetched = [];
-          custSnap.forEach(doc => {
-            if (state.editBookingId && doc.id === state.editBookingId) return;
-            custFetched.push(doc.data());
-          });
-          setCustomerBookings(custFetched);
+          try {
+            const custQ = query(collectionGroup(db, 'bookings'), where('customerPhone', '==', state.user.phone));
+            const custSnap = await getDocs(custQ);
+            const custFetched = [];
+            custSnap.forEach(doc => {
+              if (state.editBookingId && doc.id === state.editBookingId) return;
+              const data = doc.data();
+              if (data.date >= todayStr) {
+                custFetched.push(data);
+              }
+            });
+            setCustomerBookings(custFetched);
+          } catch (custErr) {
+            console.error("Error fetching customer bookings:", custErr);
+          }
         }
-
-        // Fetch employees for availability check
-        const empSnapshot = await getDocs(collection(db, 'employees'));
-        const empList = [];
-        empSnapshot.forEach(doc => {
-          empList.push({ id: doc.id, ...doc.data() });
-        });
-        setAllTherapists(empList);
       } catch (err) {
         console.error("Error fetching bookings:", err);
       } finally {
@@ -280,7 +290,7 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
           onClick={() => setWeekOffset(0)}
           className="text-base md:text-lg font-sans font-medium text-lavender hover:text-lavender-light transition-colors"
         >
-          Back to Today
+          {t('booking.backToToday')}
         </button>
       </div>
 
@@ -288,15 +298,15 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
       <div className="flex justify-center md:justify-start px-2 items-center gap-6 mb-2">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-white border-2 border-lavender/40"></div>
-          <span className="text-sm font-sans text-nature-green/70">Available</span>
+          <span className="text-sm font-sans text-nature-green/70">{t('booking.available')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded border-2 border-lavender bg-white"></div>
-          <span className="text-sm font-sans text-nature-green/70">Selected</span>
+          <span className="text-sm font-sans text-nature-green/70">{t('booking.selected')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gray-100 border-2 border-gray-200"></div>
-          <span className="text-sm font-sans text-nature-green/70">Staff Booked</span>
+          <span className="text-sm font-sans text-nature-green/70">{t('booking.staffBooked')}</span>
         </div>
       </div>
 
@@ -389,7 +399,7 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
           onClick={onBack}
           className="px-6 py-4 rounded-full font-sans text-nature-green hover:bg-nature-green/10 transition-colors flex items-center gap-2"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> {t('booking.back')}
         </button>
         <button 
           disabled={!isComplete}
@@ -400,7 +410,7 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
               : 'bg-nature-green/10 text-nature-green/40 cursor-not-allowed'
           }`}
         >
-          Next
+          {t('booking.next')}
         </button>
       </div>
     </motion.div>

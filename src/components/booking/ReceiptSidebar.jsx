@@ -2,8 +2,11 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { services } from '../../data/bookingData';
 import { Clock, User, CalendarDays } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const ReceiptSidebar = ({ state, isMobile }) => {
+  const { t } = useLanguage();
+
   // Compute totals
   let totalCost = 0;
   let totalTime = 0;
@@ -37,13 +40,13 @@ const ReceiptSidebar = ({ state, isMobile }) => {
     return (
       <div className="bg-white border-t border-nature-green/10 p-4 pb-8 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-[10px] text-nature-green/60 font-sans uppercase tracking-wider">Total</span>
+          <span className="text-[10px] text-nature-green/60 font-sans uppercase tracking-wider">{t('booking.total')}</span>
           <span className="text-2xl text-nature-green font-serif font-medium">${totalCost}</span>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-[10px] text-nature-green/60 font-sans uppercase tracking-wider">Duration</span>
+          <span className="text-[10px] text-nature-green/60 font-sans uppercase tracking-wider">{t('appointments.duration')}</span>
           <span className="text-lg text-nature-green font-sans flex items-center gap-1">
-            <Clock className="w-4 h-4" /> {totalTime} min
+            <Clock className="w-4 h-4" /> {totalTime} {t('booking.min')}
           </span>
         </div>
       </div>
@@ -52,7 +55,7 @@ const ReceiptSidebar = ({ state, isMobile }) => {
 
   return (
     <div className="h-[100dvh] flex flex-col p-10 bg-white/50 backdrop-blur-3xl sticky top-0">
-      <h3 className="font-serif text-3xl text-nature-green mb-8">Your Sanctuary</h3>
+      <h3 className="font-serif text-3xl text-nature-green mb-8">{t('booking.yourSanctuary')}</h3>
       
       <div className="flex-1 flex flex-col gap-8 overflow-y-auto pr-2 no-scrollbar">
         {/* Service Summary */}
@@ -100,8 +103,8 @@ const ReceiptSidebar = ({ state, isMobile }) => {
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">Therapist</span>
-                <span className="text-nature-green font-medium font-sans">{therapistName || 'Staff'}</span>
+                <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">{t('appointments.therapist')}</span>
+                <span className="text-nature-green font-medium font-sans">{therapistName || t('booking.staff')}</span>
               </div>
             </motion.div>
           )}
@@ -119,7 +122,7 @@ const ReceiptSidebar = ({ state, isMobile }) => {
                 <CalendarDays className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">Date & Time</span>
+                <span className="text-sm text-nature-green/60 uppercase tracking-wider text-[10px]">{t('appointments.dateTime')}</span>
                 <span className="text-nature-green font-medium font-sans">
                   {new Date(state.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {state.time}
                 </span>
@@ -131,13 +134,13 @@ const ReceiptSidebar = ({ state, isMobile }) => {
 
       <div className="pt-8 mt-auto border-t border-nature-green/10 shrink-0">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-sans text-nature-green/70">Total Duration</span>
+          <span className="font-sans text-nature-green/70">{t('booking.totalDuration')}</span>
           <span className="font-sans font-medium text-nature-green flex items-center gap-2">
-            <Clock className="w-4 h-4 text-lavender" /> {totalTime} min
+            <Clock className="w-4 h-4 text-lavender" /> {totalTime} {t('booking.min')}
           </span>
         </div>
         <div className="flex justify-between items-end mt-4">
-          <span className="font-sans text-lg text-nature-green">Total Cost</span>
+          <span className="font-sans text-lg text-nature-green">{t('appointments.totalPrice')}</span>
           <motion.span 
             key={totalCost}
             initial={{ scale: 1.1, color: '#967BB6' }}

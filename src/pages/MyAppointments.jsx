@@ -6,8 +6,10 @@ import { useAuth } from '../context/AuthContext';
 import { services } from '../data/bookingData';
 import { Calendar as CalendarIcon, Clock, ArrowLeft, Plus, Trash2, Edit2, Loader2, User, Save, X } from 'lucide-react';
 import AlertModal from '../components/AlertModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const MyAppointments = () => {
+  const { t } = useLanguage();
   const { user, updateUserSession } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
@@ -24,8 +26,8 @@ const MyAppointments = () => {
     setModalConfig({
       isOpen: true,
       type: 'confirm',
-      title: 'Cancel Appointment',
-      message: `Are you sure you want to cancel your appointment on ${new Date(booking.date).toLocaleDateString()} at ${booking.time}?`,
+      title: t('appointments.cancelAppointment'),
+      message: `${t('appointments.cancelConfirm1')}${new Date(booking.date).toLocaleDateString()}${t('appointments.cancelConfirm2')}${booking.time}?`,
       onConfirm: () => {
         setModalConfig(prev => ({ ...prev, isOpen: false }));
         executeDelete(booking);
@@ -43,8 +45,8 @@ const MyAppointments = () => {
       setModalConfig({
         isOpen: true,
         type: 'alert',
-        title: 'Error',
-        message: 'Failed to cancel the appointment. Please try again.',
+        title: t('appointments.error'),
+        message: t('appointments.cancelError'),
         onConfirm: null
       });
     } finally {
@@ -55,13 +57,13 @@ const MyAppointments = () => {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!profileData.name.trim() || !profileData.phone.trim()) {
-      setProfileError('Name and phone number are required.');
+      setProfileError(t('appointments.namePhoneRequired'));
       return;
     }
     
     // Validate phone number format (starts with 8 or 9, exactly 8 digits)
     if (!/^[89]\d{7}$/.test(profileData.phone)) {
-      setProfileError('Handphone number must be 8 digits and start with 8 or 9.');
+      setProfileError(t('appointments.phoneInvalid'));
       return;
     }
 
@@ -77,7 +79,7 @@ const MyAppointments = () => {
       if (oldPhone !== newPhone) {
         const checkSnap = await getDoc(doc(db, 'users', newPhone));
         if (checkSnap.exists()) {
-          setProfileError('This phone number is already registered.');
+          setProfileError(t('appointments.phoneExists'));
           setProfileSaving(false);
           return;
         }
@@ -124,14 +126,14 @@ const MyAppointments = () => {
       setModalConfig({
         isOpen: true,
         type: 'alert',
-        title: 'Profile Updated',
-        message: 'Your profile has been successfully updated.',
+        title: t('appointments.profileUpdated'),
+        message: t('appointments.profileUpdatedDesc'),
         onConfirm: null
       });
       
     } catch (err) {
       console.error('Failed to update profile:', err);
-      setProfileError('An error occurred while saving your profile.');
+      setProfileError(t('appointments.profileUpdateError'));
     } finally {
       setProfileSaving(false);
     }
@@ -197,7 +199,7 @@ const MyAppointments = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-base-cream flex items-center justify-center font-serif text-2xl text-nature-green">
-        Loading your appointments...
+        {t('appointments.loadingAppointments')}
       </div>
     );
   }
@@ -213,10 +215,10 @@ const MyAppointments = () => {
             className="flex items-center gap-2 text-nature-green hover:text-lavender transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to Home
+            {t('appointments.backToHome')}
           </button>
           <div className="font-serif text-xl font-medium">
-            My Appointments
+            {t('appointments.myAppointments')}
           </div>
         </div>
       </header>
@@ -226,10 +228,10 @@ const MyAppointments = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
           <div>
             <h1 className="font-serif text-3xl md:text-4xl text-nature-green mb-2">
-              Hello, {user?.name?.split(' ')[0]}
+              {t('appointments.hello')}{user?.name?.split(' ')[0]}
             </h1>
             <p className="text-nature-green/70">
-              Here are your upcoming appointments.
+              {t('appointments.upcomingDesc')}
             </p>
           </div>
           
@@ -243,14 +245,14 @@ const MyAppointments = () => {
               className="flex items-center gap-2 bg-white text-nature-green hover:bg-base-cream border border-nature-green/10 px-6 py-3 rounded-full font-medium shadow-sm transition-all active:scale-95"
             >
               <User className="w-5 h-5" />
-              Profile
+              {t('appointments.profile')}
             </button>
             <button 
               onClick={() => navigate('/book')}
               className="flex items-center gap-2 bg-nature-green text-white hover:bg-nature-greenLight px-6 py-3 rounded-full font-medium shadow-lg transition-all active:scale-95"
             >
               <Plus className="w-5 h-5" />
-              New Booking
+              {t('appointments.newBooking')}
             </button>
           </div>
         </div>
@@ -259,18 +261,18 @@ const MyAppointments = () => {
           <div className="flex justify-between items-center border-b border-nature-green/10 pb-6 mb-6">
             <div className="flex items-center gap-3">
               <CalendarIcon className="w-6 h-6 text-lavender" />
-              <h2 className="font-serif text-2xl">Your Schedule</h2>
+              <h2 className="font-serif text-2xl">{t('appointments.yourSchedule')}</h2>
             </div>
             <div className="text-sm font-medium opacity-60 bg-base-cream px-4 py-2 rounded-full">
-              {bookings.length} {bookings.length === 1 ? 'Booking' : 'Bookings'}
+              {bookings.length} {bookings.length === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}
             </div>
           </div>
 
           {bookings.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center opacity-60">
               <CalendarIcon className="w-16 h-16 mb-4 opacity-20" />
-              <p className="text-xl font-serif">You have no upcoming appointments.</p>
-              <p className="text-sm mt-2 font-sans">Treat yourself to a relaxing spa session today.</p>
+              <p className="text-xl font-serif">{t('appointments.noAppointments')}</p>
+              <p className="text-sm mt-2 font-sans">{t('appointments.treatYourself')}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-5">
@@ -294,19 +296,19 @@ const MyAppointments = () => {
                       <h4 className="font-bold text-nature-green text-lg">{services[booking.service]?.name || booking.service}</h4>
                       {booking.addOns && booking.addOns.length > 0 && (
                         <p className="text-sm opacity-70 mt-1">
-                          Includes: {booking.addOns.join(', ')}
+                          {t('appointments.includes')}{booking.addOns.join(', ')}
                         </p>
                       )}
                       <div className="flex items-center gap-1.5 mt-2 text-nature-green/70 text-sm">
                         <User className="w-3.5 h-3.5" />
-                        <span>{employees[booking.therapistId] || 'Staff'}</span>
+                        <span>{employees[booking.therapistId] || t('booking.staff')}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div className="text-right flex flex-col md:items-end gap-3 mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-nature-green/10">
                     <span className="inline-block px-4 py-2 bg-white rounded-xl text-sm font-medium border border-nature-green/10 shadow-sm">
-                      {booking.duration} Minutes
+                      {booking.duration} {t('booking.minutes')}
                     </span>
                     
                     <div className="flex items-center gap-2 mt-2">
@@ -327,7 +329,7 @@ const MyAppointments = () => {
                         onClick={() => handleDelete(booking)}
                         disabled={deletingId === booking.id}
                         className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
-                        title="Cancel Appointment"
+                        title={t('appointments.cancelAppointment')}
                       >
                         {deletingId === booking.id ? (
                           <Loader2 className="w-5 h-5 animate-spin" />
@@ -363,7 +365,7 @@ const MyAppointments = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="font-serif text-2xl text-nature-green mb-6">Edit Profile</h3>
+            <h3 className="font-serif text-2xl text-nature-green mb-6">{t('appointments.editProfile')}</h3>
             
             {profileError && (
               <div className="mb-4 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl">
@@ -373,18 +375,18 @@ const MyAppointments = () => {
             
             <form onSubmit={handleSaveProfile} className="flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">Full Name</label>
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">{t('appointments.fullName')}</label>
                 <input 
                   type="text" 
                   value={profileData.name} 
                   onChange={e => setProfileData({...profileData, name: e.target.value.replace(/[^a-zA-Z\s]/g, '')})}
-                  placeholder="Enter your name"
+                  placeholder={t('appointments.enterName')}
                   className="p-3 bg-base-cream/50 rounded-xl border border-nature-green/10 focus:border-lavender focus:outline-none text-nature-green" 
                   required
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">Handphone Number</label>
+                <label className="text-xs font-semibold uppercase tracking-wider opacity-70 text-nature-green">{t('appointments.handphoneNumber')}</label>
                 <div className="flex items-center">
                   <div className="p-3 bg-base-cream/50 rounded-l-xl border border-r-0 border-nature-green/10 text-nature-green font-medium">
                     +65
@@ -398,7 +400,7 @@ const MyAppointments = () => {
                     required
                   />
                 </div>
-                <p className="text-xs text-nature-green/50 mt-1">This will update your login ID.</p>
+                <p className="text-xs text-nature-green/50 mt-1">{t('appointments.updateLoginId')}</p>
               </div>
               
               <button 
@@ -407,7 +409,7 @@ const MyAppointments = () => {
                 className="mt-4 flex items-center justify-center gap-2 w-full bg-nature-green text-white py-4 rounded-xl font-medium hover:bg-nature-greenLight transition-all active:scale-95 disabled:opacity-50"
               >
                 {profileSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                {profileSaving ? 'Saving...' : 'Save Profile'}
+                {profileSaving ? t('appointments.saving') : t('appointments.saveProfile')}
               </button>
             </form>
           </div>

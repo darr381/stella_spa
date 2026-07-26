@@ -2,8 +2,10 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { services } from '../../data/bookingData';
 import { Check, Clock, DollarSign } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Step1ServiceSelection = ({ state, updateState, onNext }) => {
+  const { t } = useLanguage();
 
   const handleServiceSelect = (serviceId) => {
     if (state.service !== serviceId) {
@@ -31,7 +33,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
       className="flex flex-col gap-10"
     >
       <div>
-        <h2 className="font-serif text-3xl text-nature-green mb-6">Select Your Package</h2>
+        <h2 className="font-serif text-3xl text-nature-green mb-6">{t('booking.selectPackage')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.values(services).map(svc => (
             <button
@@ -46,7 +48,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
                 {svc.name}
               </span>
               <div className="flex gap-4 text-sm font-medium opacity-70">
-                <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {svc.duration} min</span>
+                <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {svc.duration} {t('booking.min')}</span>
                 <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {svc.price}</span>
               </div>
               {state.service === svc.id && (
@@ -76,7 +78,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
                   <h3 className="font-serif text-3xl text-nature-green">{currentServiceDef.name}</h3>
                   <div className="flex gap-4 mt-2 font-sans text-nature-green/70 font-medium">
                     <span className="bg-lavender/10 text-lavender px-3 py-1 rounded-full text-sm">
-                      {currentServiceDef.duration} Minutes
+                      {currentServiceDef.duration} {t('booking.minutes')}
                     </span>
                     <span className="bg-nature-green/10 text-nature-green px-3 py-1 rounded-full text-sm">
                       ${currentServiceDef.price}
@@ -87,7 +89,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
 
               <div className="relative z-10">
                 <h4 className="font-sans font-semibold uppercase tracking-widest text-nature-green/50 text-xs mb-4">
-                  Included in this package ({currentServiceDef.included.length} steps)
+                  {t('booking.includedInPackage')} ({currentServiceDef.included.length} {t('booking.steps')})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6">
                   {currentServiceDef.included.map((item, idx) => (
@@ -103,7 +105,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
             {/* Add-Ons Section */}
             {currentServiceDef.addOns && currentServiceDef.addOns.length > 0 && (
               <div>
-                <h3 className="font-serif text-2xl text-nature-green mb-6">Optional Add-Ons</h3>
+                <h3 className="font-serif text-2xl text-nature-green mb-6">{t('booking.optionalAddOns')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {currentServiceDef.addOns.map(addon => {
                     const isSelected = (state.addOns || []).includes(addon.id);
@@ -143,7 +145,7 @@ const Step1ServiceSelection = ({ state, updateState, onNext }) => {
               : 'bg-nature-green/20 text-white cursor-not-allowed'
             }`}
         >
-          Continue to Therapist
+          {t('booking.continueStaff')}
         </button>
       </div>
     </motion.div>

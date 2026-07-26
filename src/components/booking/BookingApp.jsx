@@ -8,10 +8,12 @@ import Step3DateTime from './Step3DateTime';
 import Step4Checkout from './Step4Checkout';
 import ReceiptSidebar from './ReceiptSidebar';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const BookingApp = () => {
   const { user: authUser } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const location = useLocation();
   const editBooking = location.state?.editBooking;
 
@@ -40,7 +42,7 @@ const BookingApp = () => {
         <header className="p-6 md:p-10 flex justify-between items-center z-10 sticky top-0 bg-base-cream/90 backdrop-blur-md border-b border-nature-green/5">
           <button onClick={() => navigate('/my-appointments')} className="flex items-center gap-2 text-nature-green hover:text-lavender transition-colors font-medium group bg-white px-4 py-2 rounded-full shadow-sm">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to My Appointments
+            {t('booking.backToMy')}
           </button>
           <span className="font-serif text-2xl font-semibold text-nature-green tracking-wide">NaturaSpa</span>
         </header>
