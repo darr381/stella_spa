@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgBjQIQNUoVG_z77UMm8UcXARr3tqZVoU",
@@ -15,4 +15,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-export const db = getFirestore(app);
+
+// Use initializeFirestore to force long polling and prevent 1-2 minute WebSocket stall on mobile cellular networks
+export const db = initializeFirestore(app, { 
+  experimentalForceLongPolling: true 
+});
