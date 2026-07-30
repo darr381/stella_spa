@@ -87,14 +87,6 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
     const fetchBookings = async () => {
       setIsLoading(true);
       try {
-        // Fetch employees for availability check FIRST to prevent query errors from breaking it
-        const empSnapshot = await getDocs(collection(db, 'employees'));
-        const empList = [];
-        empSnapshot.forEach(doc => {
-          empList.push({ id: doc.id, ...doc.data() });
-        });
-        setAllTherapists(empList);
-
         const todayStr = getLocalISODate(getToday());
         let q;
         if (state.therapist === 'any') {
@@ -102,8 +94,27 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         } else {
           q = query(collection(db, `therapists/${state.therapist}/bookings`), where('date', '>=', todayStr));
         }
-        
-        const querySnapshot = await getDocs(q);
+
+        const custQ = (state.user?.phone) 
+          ? query(collectionGroup(db, 'bookings'), where('customerPhone', '==', state.user.phone))
+          : null;
+
+        // Fetch everything in parallel
+        const [empSnapshot, querySnapshot, custSnap] = await Promise.all([
+          getDocs(collection(db, 'employees')),
+          getDocs(q),
+          custQ ? getDocs(custQ).catch(err => {
+            console.error("Error fetching customer bookings:", err);
+            return null;
+          }) : Promise.resolve(null)
+        ]);
+
+        const empList = [];
+        empSnapshot.forEach(doc => {
+          empList.push({ id: doc.id, ...doc.data() });
+        });
+        setAllTherapists(empList);
+
         const fetched = [];
         querySnapshot.forEach(doc => {
           if (state.editBookingId && doc.id === state.editBookingId) return;
@@ -111,24 +122,16 @@ const Step3DateTime = ({ state, updateState, onNext, onBack }) => {
         });
         setBookings(fetched);
 
-        // Fetch the logged-in customer's own bookings to prevent double-booking themselves
-        // Removed the date filter to avoid requiring a composite collectionGroup index
-        if (state.user?.phone) {
-          try {
-            const custQ = query(collectionGroup(db, 'bookings'), where('customerPhone', '==', state.user.phone));
-            const custSnap = await getDocs(custQ);
-            const custFetched = [];
-            custSnap.forEach(doc => {
-              if (state.editBookingId && doc.id === state.editBookingId) return;
-              const data = doc.data();
-              if (data.date >= todayStr) {
-                custFetched.push(data);
-              }
-            });
-            setCustomerBookings(custFetched);
-          } catch (custErr) {
-            console.error("Error fetching customer bookings:", custErr);
-          }
+        if (custSnap) {
+          const custFetched = [];
+          custSnap.forEach(doc => {
+            if (state.editBookingId && doc.id === state.editBookingId) return;
+            const data = doc.data();
+            if (data.date >= todayStr) {
+              custFetched.push(data);
+            }
+          });
+          setCustomerBookings(custFetched);
         }
       } catch (err) {
         console.error("Error fetching bookings:", err);

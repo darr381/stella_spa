@@ -148,13 +148,18 @@ const MyAppointments = () => {
 
     const fetchAppointments = async () => {
       try {
-        // Query ALL bookings across ALL therapists for this customer
+        // Prepare queries
         const q = query(
           collectionGroup(db, 'bookings'),
           where('customerPhone', '==', user.phone)
         );
         
-        const snapshot = await getDocs(q);
+        // Fetch in parallel
+        const [snapshot, empSnapshot] = await Promise.all([
+          getDocs(q),
+          getDocs(collection(db, 'employees'))
+        ]);
+        
         const getLocalISODate = (date) => {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -177,8 +182,7 @@ const MyAppointments = () => {
           return timeA.localeCompare(timeB);
         });
 
-        // Also fetch all employees to map therapistId to names
-        const empSnapshot = await getDocs(collection(db, 'employees'));
+        // Map employees
         const empMap = {};
         empSnapshot.forEach(doc => {
           empMap[doc.id] = doc.data().displayName || doc.data().name;
