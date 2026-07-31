@@ -22,6 +22,9 @@ const MyAppointments = () => {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState('');
 
+  const getServiceName = (id) => services[id]?.name || id;
+  const getAddonName = (serviceId, id) => services[serviceId]?.addOns?.find(a => a.id === id)?.name || id;
+
   const handleDelete = (booking) => {
     setModalConfig({
       isOpen: true,
@@ -297,10 +300,10 @@ const MyAppointments = () => {
                     </div>
                     
                     <div className="mt-2">
-                      <h4 className="font-bold text-nature-green text-lg">{services[booking.service]?.name || booking.service}</h4>
+                      <h4 className="font-bold text-nature-green text-lg">{getServiceName(booking.service)}</h4>
                       {booking.addOns && booking.addOns.length > 0 && (
                         <p className="text-sm opacity-70 mt-1">
-                          {t('appointments.includes')}{booking.addOns.join(', ')}
+                          {t('appointments.includes')}{booking.addOns.map(id => getAddonName(booking.service, id)).join(', ')}
                         </p>
                       )}
                       <div className="flex items-center gap-1.5 mt-2 text-nature-green/70 text-sm">

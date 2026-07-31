@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { services } from '../data/bookingData';
 import AlertModal from '../components/AlertModal';
-import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2 } from 'lucide-react';
+import { LogOut, Save, User, Clock, CalendarX2, Calendar as CalendarIcon, X, CheckCircle2, ArrowLeft, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -25,6 +25,14 @@ const StaffDashboard = () => {
   const [tempLeave, setTempLeave] = useState({ startDate: '', endDate: '' });
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '' });
+
+  // Calendar Modal states
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedDayISO, setSelectedDayISO] = useState(null);
+
+  const getServiceName = (id) => services[id]?.name || id;
+  const getAddonName = (serviceId, id) => services[serviceId]?.addOns?.find(a => a.id === id)?.name || id;
 
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
@@ -363,13 +371,22 @@ const StaffDashboard = () => {
         {/* Right Column: Schedule */}
         <div className="lg:col-span-2">
           <div className="bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-nature-green/5 min-h-[600px]">
-            <div className="flex justify-between items-center border-b border-nature-green/10 pb-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-nature-green/10 pb-6 mb-6 gap-4">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="w-6 h-6 text-lavender" />
                 <h2 className="font-serif text-2xl">{t('staff.upcomingAppointments')}</h2>
               </div>
-              <div className="text-sm font-medium opacity-60 bg-base-cream px-4 py-2 rounded-full">
-                {bookings.length} {bookings.length === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowCalendarModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-lavender/10 text-lavender hover:bg-lavender/20 rounded-full text-sm font-medium transition-colors"
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  View Calendar
+                </button>
+                <div className="text-sm font-medium opacity-60 bg-base-cream px-4 py-2 rounded-full">
+                  {bookings.length} {bookings.length === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}
+                </div>
               </div>
             </div>
 
@@ -396,10 +413,12 @@ const StaffDashboard = () => {
                     
                     <div className="text-right flex flex-col md:items-end gap-1">
                       <span className="inline-block px-3 py-1 bg-white rounded-full text-xs font-bold uppercase tracking-wider border border-nature-green/10">
-                        {services[booking.service]?.name || booking.service}
+                        {getServiceName(booking.service)}
                       </span>
                       {booking.addOns && booking.addOns.length > 0 && (
-                        <span className="text-xs opacity-60">+{booking.addOns.length} {booking.addOns.length > 1 ? t('staff.addons') : t('staff.addon')}</span>
+                        <span className="text-[10px] md:text-xs opacity-60 text-right max-w-[150px] md:max-w-[200px] leading-tight">
+                          + {booking.addOns.map(id => getAddonName(booking.service, id)).join(', ')}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -465,6 +484,172 @@ const StaffDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Calendar Modal Overlay */}
+      {showCalendarModal && (() => {
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay();
+        
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+
+        const getLocalISODate = (d) => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        };
+
+        if (selectedDayISO) {
+          const dayBookings = bookings.filter(b => b.date === selectedDayISO);
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4 md:px-0 py-6 md:py-10 bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <div className="w-full max-w-2xl bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl relative max-h-[90vh] overflow-y-auto styled-scrollbar">
+                <button 
+                  onClick={() => setSelectedDayISO(null)}
+                  className="absolute top-6 left-6 p-2 flex items-center gap-2 text-nature-green/60 hover:text-nature-green hover:bg-nature-green/5 rounded-full transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="font-medium">Back</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    setSelectedDayISO(null);
+                    setShowCalendarModal(false);
+                  }}
+                  className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 text-black/50"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                
+                <div className="mt-12 mb-8">
+                  <h3 className="font-serif text-3xl text-nature-green">
+                    {new Date(selectedDayISO + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                  </h3>
+                  <p className="text-sm opacity-60 mt-1">{dayBookings.length} {dayBookings.length === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}</p>
+                </div>
+
+                {dayBookings.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-48 text-center opacity-60 bg-base-cream/50 rounded-2xl">
+                    <CalendarIcon className="w-10 h-10 mb-3 opacity-20" />
+                    <p className="text-lg">No appointments on this day</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {dayBookings.map((booking) => (
+                      <div key={booking.id} className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-5 rounded-2xl bg-base-cream/30 hover:bg-base-cream/70 transition-colors border border-nature-green/5">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-3">
+                            <span className="font-sans font-semibold text-lg bg-white px-3 py-1 rounded-full shadow-sm border border-nature-green/10 text-nature-green">{booking.time}</span>
+                          </div>
+                          <h4 className="font-medium text-nature-green mt-2">{booking.customerName}</h4>
+                          <p className="text-sm opacity-70 flex items-center gap-2">
+                            <span>{booking.customerPhone}</span>
+                          </p>
+                        </div>
+                        
+                        <div className="text-right flex flex-col md:items-end gap-2">
+                          <span className="inline-block px-3 py-1 bg-lavender/10 text-lavender rounded-full text-xs font-bold uppercase tracking-wider">
+                            {getServiceName(booking.service)}
+                          </span>
+                          {booking.addOns && booking.addOns.length > 0 && (
+                            <span className="text-[10px] md:text-xs opacity-60 text-right max-w-[150px] md:max-w-[200px] leading-tight">
+                              + {booking.addOns.map(id => getAddonName(booking.service, id)).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        const daysArr = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+        const blanksArr = Array.from({ length: firstDay }, (_, i) => i);
+        const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 md:px-0 py-6 md:py-10 bg-black/60 backdrop-blur-sm animate-in fade-in">
+            <div className="w-full max-w-4xl bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl relative max-h-[90vh] overflow-y-auto styled-scrollbar">
+              <button 
+                onClick={() => setShowCalendarModal(false)}
+                className="absolute top-6 right-6 p-2 rounded-full hover:bg-black/5 text-black/50 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="flex items-center justify-between mb-8 px-2 md:px-6">
+                <h3 className="font-serif text-2xl md:text-3xl text-nature-green">
+                  {monthNames[month]} {year}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setCalendarDate(new Date(year, month - 1, 1))}
+                    className="p-2 rounded-full hover:bg-nature-green/5 text-nature-green transition-colors"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button 
+                    onClick={() => setCalendarDate(new Date(year, month + 1, 1))}
+                    className="p-2 rounded-full hover:bg-nature-green/5 text-nature-green transition-colors"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-7 gap-2 md:gap-4 px-0 md:px-6">
+                {weekDays.map(day => (
+                  <div key={day} className="text-center text-xs md:text-sm font-semibold uppercase tracking-wider text-nature-green/50 pb-2">
+                    {day}
+                  </div>
+                ))}
+                
+                {blanksArr.map((_, i) => (
+                  <div key={`blank-${i}`} className="min-h-[80px] md:min-h-[100px] rounded-2xl bg-base-cream/20 border border-nature-green/5"></div>
+                ))}
+                
+                {daysArr.map(day => {
+                  const cellDate = new Date(year, month, day);
+                  const iso = getLocalISODate(cellDate);
+                  const dayBookings = bookings.filter(b => b.date === iso);
+                  const count = dayBookings.length;
+                  const isToday = getLocalISODate(new Date()) === iso;
+                  
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedDayISO(iso)}
+                      className={`min-h-[80px] md:min-h-[100px] p-2 md:p-3 rounded-2xl border transition-all flex flex-col items-center justify-start gap-2 active:scale-95 ${
+                        isToday ? 'border-lavender/50 bg-lavender/5' : 'border-nature-green/10 hover:border-lavender/40 hover:bg-white bg-base-cream/20 shadow-sm hover:shadow-md'
+                      }`}
+                    >
+                      <span className={`text-sm md:text-base font-serif ${isToday ? 'text-lavender font-bold' : 'text-nature-green font-medium'}`}>
+                        {day}
+                      </span>
+                      
+                      {count > 0 && (
+                        <div className="mt-auto mb-1 w-full flex justify-center">
+                          <span className="bg-lavender text-white text-[10px] md:text-xs font-bold px-2 py-1 md:px-3 md:py-1 rounded-full shadow-sm whitespace-nowrap">
+                            {count} {count === 1 ? t('appointments.bookingCount') : t('appointments.bookingsCount')}
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Toast Notification */}
       <AnimatePresence>

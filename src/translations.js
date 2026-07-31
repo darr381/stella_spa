@@ -220,6 +220,24 @@ export const translations = {
       missingDates: "Missing Dates",
       missingDatesDesc: "Please select both start and end dates.",
       confirmLeave: "Confirm Leave Range"
+    },
+    services: {
+      vip1a: "VIP 1A",
+      vip1b: "VIP 1B",
+      vip1c: "VIP 1C",
+      vip1d: "VIP 1D",
+      vip2: "VIP 2",
+      vip3: "VIP 3",
+      basic_aqua: "Basic Aqua Head Therapy Spa",
+      vip1_aqua: "VIP 1: Aqua Head Therapy Spa",
+      vip2_aqua: "VIP 2: Aqua Head Therapy Spa",
+      vip3_aqua: "VIP 3: Aqua Head Therapy Spa",
+      add_facial: "Facial therapy massage",
+      add_scalp_gua_sha: "Scalp Gua Sha",
+      add_ear_candling: "Ear massage candling",
+      add_facial_gua_sha: "Facial Gua Sha",
+      add_neck_steam: "Neck & shoulder herbal steam",
+      add_foot_detox: "Herbal foot detox spa"
     }
   },
   zh: {
@@ -444,6 +462,24 @@ export const translations = {
       missingDates: "缺少日期",
       missingDatesDesc: "请选择开始和结束日期。",
       confirmLeave: "确认休假范围"
+    },
+    services: {
+      vip1a: "VIP 1A",
+      vip1b: "VIP 1B",
+      vip1c: "VIP 1C",
+      vip1d: "VIP 1D",
+      vip2: "VIP 2",
+      vip3: "VIP 3",
+      basic_aqua: "基础水疗头部护理",
+      vip1_aqua: "VIP 1: 水疗头部护理",
+      vip2_aqua: "VIP 2: 水疗头部护理",
+      vip3_aqua: "VIP 3: 水疗头部护理",
+      add_facial: "面部理疗按摩",
+      add_scalp_gua_sha: "头皮刮痧",
+      add_ear_candling: "耳部按摩采耳",
+      add_facial_gua_sha: "面部刮痧",
+      add_neck_steam: "颈肩草本蒸汽",
+      add_foot_detox: "草本足部排毒水疗"
     }
   }
 };
